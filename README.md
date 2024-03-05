@@ -6,15 +6,15 @@
 
 ### Shortcut
 
-- `cmd+opt+g`: to select some text, then call google search in little window. it's work when fullscreen,  so you don't need to switch window when you need to google. you enter `cmd+w` to close window.
+- `cmd+opt+g`: To select some text, then call google search in little window. it works when in fullscreen, allowing you to avoid switching windows when you need to perform a Google search. You can close the window by pressing `Cmd+W`.
 
   ![Screenshot 2024-03-05 at 15.58.29](README.assets/Screenshot%202024-03-05%20at%2015.58.29.png)
 
-- 'opt+,': to translate a text, then show as side-by-side. you just enter `\space` to close window. 
+- `opt+,`: To translate a text and display it side-by-side, simply enter `\space` to close the window. 
 
   ![Screenshot 2024-03-05 at 13.36.43](README.assets/Screenshot%202024-03-05%20at%2013.36.43-9617654.png)
 
-  > ‼️ you must install a shortcut in mac, which named "apple-translator", because this function dependency internal apple translate function, which no need to link with internet.
+  > ‼️ you must install a shortcut in mac, which named "apple-translator", because this function relies on the internal Apple Translate feature, it doesn't require an internet connection.
   >
   > ![Screenshot 2024-03-05 at 13.39.10](README.assets/Screenshot%202024-03-05%20at%2013.39.10-9617654.png)
 
@@ -26,5 +26,4 @@
 
   ## Features
 
-- menu icon may randomly select.
-
+- The menu icon may be selected randomly.
