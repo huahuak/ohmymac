@@ -1,6 +1,6 @@
-# awesome-mac
+# ohmymac
 
-awesomemac is statusbar-only application, which is used to extend functionality of mac.
+[ohmymac](https://github.com/huahuak/ohmymac) is a statusbar-only application, which is used to extend functionality of mac.
 
 ##  For now
 
@@ -8,7 +8,7 @@ awesomemac is statusbar-only application, which is used to extend functionality 
 
 - `cmd+opt+g`: to select some text, then call google search in little window. it's work when fullscreen,  so you don't need to switch window when you need to google. you enter `cmd+w` to close window.
 
-  ![Screenshot 2024-03-05 at 13.34.14](README.assets/Screenshot%202024-03-05%20at%2013.34.14-9617654.png)
+  ![Screenshot 2024-03-05 at 15.58.29](README.assets/Screenshot%202024-03-05%20at%2015.58.29.png)
 
 - 'opt+,': to translate a text, then show as side-by-side. you just enter `\space` to close window. 
 
