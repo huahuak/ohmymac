@@ -148,6 +148,14 @@ fileprivate let fm = {
             window.close()
             return nil
         }
+        if event.modifierFlags.contains(.command) && event.characters == "o" {
+            let wvc = fm.window.contentViewController as! WebViewController
+            if let url = wvc.wv?.url {
+                NSWorkspace.shared.open(url)
+                window.close()
+                return nil
+            }
+        }
         return event
     }
     
