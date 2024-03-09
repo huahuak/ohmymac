@@ -13,6 +13,9 @@ import Cocoa
 class Menu {
     let statusItem: NSStatusItem
     let view: NSStackView
+    let busyBtn = {
+        return createMenuButton(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
+    }()
     
     init() {
         statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(72))
@@ -44,11 +47,11 @@ class Menu {
     }
     
     func busy() {
-        statusItem.button?.image = NSImage(systemSymbolName: "rays", accessibilityDescription: nil)
+        show(busyBtn)
     }
     
     func free() {
-        //        statusItem.button?.image = oldImg
+        clean(busyBtn)
     }
 }
 

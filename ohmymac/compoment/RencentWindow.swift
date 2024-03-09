@@ -28,6 +28,9 @@ class WindowSwitchListener {
             debugPrint("get front most window failed"); return
         }
         // check
+        if activatedApp.localizedName == "ohmymac" {
+            return
+        }
         if let old = wsas.last {
             let apple = AXUIElementCreateApplication(old.app.processIdentifier)
             let allW = WindowAction.getAllWindowElement(apple)
