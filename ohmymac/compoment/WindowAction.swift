@@ -154,6 +154,17 @@ class WindowAction {
         return size
     }
     
+    static func isWindowMinimized(window: AXUIElement) -> Bool {
+        var minimized: AnyObject?
+        let minimizedAttribute = kAXMinimizedAttribute as CFString
+        let result = AXUIElementCopyAttributeValue(window, minimizedAttribute, &minimized)
+        
+        if result == .success, let isMinimized = minimized as? Bool {
+            return isMinimized
+        }
+        return false
+    }
+    
     private static func toValue<T>(ax: AXValue) -> T? {
         let pointer = UnsafeMutablePointer<T>.allocate(capacity: 1)
         let success = AXValueGetValue(ax, AXValueGetType(ax), pointer)

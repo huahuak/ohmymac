@@ -70,29 +70,22 @@ fileprivate func _init() {
             return
         }
         main.async {
-            var oldImage: NSImage?
-            if let appDelegate = NSApplication.shared.delegate as? AppDelegate, let btn = appDelegate.menu.button  {
-                oldImage = btn.image
-                btn.image = NSImage(systemSymbolName: "rays", accessibilityDescription: nil)
-            }
+            menu.busy()
             f() {
-                if let oldImage = oldImage {
-                    if let appDelegate = NSApplication.shared.delegate as? AppDelegate, let btn = appDelegate.menu.button  {
-                        btn.image = oldImage
-                    }
-                }
+                menu.free()
                 doing.store(old, ordering: AtomicStoreOrdering.relaxed)
                 debugPrint("one done!")
             }
         }
     }
     
-    func percentExec(_ width: Double, _ height: Double = 1) {
-        guard let frontMostWindow = WindowAction.getFrontMostWindow() else {
-            debugPrint("get front most window failed"); return
-        }
-        WindowAction.percent(frontMostWindow, widthPercent: width, heightPercent: height)
-    }
+
     
 }
 
+func percentExec(_ width: Double, _ height: Double = 1) {
+    guard let frontMostWindow = WindowAction.getFrontMostWindow() else {
+        debugPrint("get front most window failed"); return
+    }
+    WindowAction.percent(frontMostWindow, widthPercent: width, heightPercent: height)
+}

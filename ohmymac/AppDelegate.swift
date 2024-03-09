@@ -10,7 +10,8 @@ import Foundation
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
-    let menu = huahuamacMenu()
+    
+    let listener = WindowSwitchListener()
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         requestAccessibilityPermission()
