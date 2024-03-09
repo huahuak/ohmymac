@@ -25,7 +25,7 @@ var doing = ManagedAtomic<Int>(0)
 
 fileprivate func _init() {
     // MARK: - window action
-    add(HotKey(key: .l, modifiers: [.option]), { percentExec(0.6, 0.8) })
+    add(HotKey(key: .l, modifiers: [.option]), { percentExec(0.75, 0.85) })
     add(HotKey(key: .semicolon, modifiers: [.option]), { percentExec(0.75) })
     add(HotKey(key: .quote, modifiers: [.option]), { percentExec(0.9) })
     add(HotKey(key: .m, modifiers: [.option]), { percentExec(1) })

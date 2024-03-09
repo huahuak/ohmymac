@@ -6,7 +6,7 @@
 
 ### Shortcut
 
-- `cmd+opt+g`: To select some text, then call google search in little window. it works when in fullscreen, allowing you to avoid switching windows when you need to perform a Google search. You can close the window by pressing `Cmd+W`.
+- `cmd+opt+g`: To select some text, then call google search in little window. it works when in fullscreen, allowing you to avoid switching windows when you need to perform a Google search. You can close the window by pressing `Cmd+W`. You can open website in the google by pressing `Cmd+O`.
 
   ![Screenshot 2024-03-05 at 15.58.29](README.assets/Screenshot%202024-03-05%20at%2015.58.29.png)
 

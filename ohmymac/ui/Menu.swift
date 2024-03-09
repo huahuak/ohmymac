@@ -10,44 +10,45 @@ import Cocoa
 // COMMENT:
 // menu is used to set menu icon.
 
+
 func huahuamacMenu() -> NSStatusItem {
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     if let button = statusItem.button {
         button.image = NSImage(systemSymbolName: randomIcon(), accessibilityDescription: nil)
+        button.action = #selector(AppDelegate.buttonClicked)
     }
     return statusItem
 }
 
+extension AppDelegate { // TODO, remove buttonClicked function from AppDelegate
+    @objc func buttonClicked(sender: NSStatusBarButton) {
+        sender.image = NSImage(systemSymbolName: randomIcon(), accessibilityDescription: nil)
+    }
+}
+
+
+
 func randomIcon() -> String {
     let iconString = """
-        figure.american.football
-        figure.archery
-        figure.australian.football
-        figure.badminton
-        figure.barre
-        figure.baseball
-        figure.basketball
-        figure.bowling
-        figure.boxing
-        figure.climbing
-        figure.cooldown
-        figure.core.training
-        figure.cricket
-        figure.skiing.crosscountry
-        figure.cross.training
-        figure.curling
-        figure.dance
-        figure.disc.sports
-        figure.skiing.downhill
-        figure.elliptical
-        figure.equestrian.sports
-        figure.fencing
-        figure.fishing
-        figure.flexibility
-        figure.strengthtraining.functional
-        figure.golf
-        figure.gymnastics
+    figure.walk
+    figure.run
+    figure.archery
+    figure.badminton
+    figure.baseball
+    figure.bowling
+    figure.boxing
+    figure.climbing
+    figure.snowboarding
+    figure.soccer
+    figure.highintensity.intervaltraining
+    figure.pool.swim
+    figure.open.water.swim
+    command
     """
     let iconList = iconString.split(separator: "\n").map({ $0.trimmingCharacters(in: [" "])})
+    
     return iconList[Int.random(in: 0...iconList.count-1)]
 }
+
+
+

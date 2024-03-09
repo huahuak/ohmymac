@@ -14,11 +14,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         requestAccessibilityPermission()
-        
 //        startWindowAction()
         startShortcut()
-
-        
         NSApp.setActivationPolicy(.accessory)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -30,7 +27,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func requestAccessibilityPermission() {
         let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
-        
         if trusted {
             debugPrint("Accessibility permission granted.")
         } else {
@@ -39,5 +35,4 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             exit(ErrCode.NoPermission)
         }
     }
-
 }
