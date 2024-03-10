@@ -18,16 +18,10 @@ class Menu {
     }()
     
     init() {
-        statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(72))
-        statusItem.button?.action = #selector(AppDelegate.buttonClicked)
-        
+        statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(24))
         view = NSStackView(frame: NSRect(x: 0, y: 0, width: 72, height: 24))
         view.orientation = .horizontal
-//                view.spacing = 2
         view.distribution = .fillEqually
-        view.addArrangedSubview(createMenuButton(randomIcon()))
-        view.addArrangedSubview(createMenuButton(randomIcon()))
-        view.addArrangedSubview(createMenuButton(randomIcon()))
         statusItem.button?.addSubview(view)
     }
     
@@ -37,13 +31,16 @@ class Menu {
             view.subviews.removeFirst()
         }
         view.addArrangedSubview(v)
+        statusItem.length = CGFloat(view.subviews.count * 24)
+        view.frame.size.width = CGFloat(view.subviews.count * 24)
+
+        
     }
     
     func clean(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
-        if view.subviews.count < 3 {
-            view.insertArrangedSubview(createMenuButton(randomIcon()), at: 0)
-        }
+        statusItem.length = CGFloat(view.subviews.count * 24)
+        view.frame.size.width = CGFloat(view.subviews.count * 24)
     }
     
     func busy() {
@@ -52,12 +49,6 @@ class Menu {
     
     func free() {
         clean(busyBtn)
-    }
-}
-
-extension AppDelegate {
-    @objc func buttonClicked(sender: NSStatusBarButton) {
-        //        sender.image = randomIcon()
     }
 }
 

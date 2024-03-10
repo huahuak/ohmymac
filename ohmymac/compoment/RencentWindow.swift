@@ -8,18 +8,22 @@
 import Foundation
 import AppKit
 
+func startRecentWindow() {
+    
+}
+
 var wsas: [WindowSwitchAction] = []
 
 class WindowSwitchListener {
+    var observer: AXObserver?
+    
     init() {
         let notificationCenter = NSWorkspace.shared.notificationCenter
-        notificationCenter.addObserver(self, selector: #selector(windowDidSwitch(notification:)), name: NSWorkspace.didActivateApplicationNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(addWSA(notification:)), name: NSWorkspace.didActivateApplicationNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appWillLaunch(notification:)), name: NSWorkspace.willLaunchApplicationNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(windowDidClose(notification:)), name: NSWorkspace.didHideApplicationNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(windowDidClose(notification:)), name: NSWorkspace.didTerminateApplicationNotification, object: nil)
     }
     
-    @objc func windowDidSwitch(notification: Notification) {
+    @objc func addWSA(notification: Notification) {
         guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
             return
         }
@@ -31,20 +35,15 @@ class WindowSwitchListener {
         if activatedApp.localizedName == "ohmymac" {
             return
         }
-        if let old = wsas.last {
-            let apple = AXUIElementCreateApplication(old.app.processIdentifier)
-            let allW = WindowAction.getAllWindowElement(apple)
-            let notMin = allW?.filter({ w in
-                !WindowAction.isWindowMinimized(window: w)
-            }).count
-            if notMin == 0 {
-                let wsa = wsas.removeLast()
-                menu.clean(wsa.btn)
+        var toRemove: [WindowSwitchAction] = []
+        wsas.forEach({ it in
+            if WindowAction.getSingleWindowElement(
+                AXUIElementCreateApplication(it.app.processIdentifier)) == nil {
+                toRemove.append(it)
             }
-            if old.app.localizedName == "Finder" && allW!.count - notMin! < 2 {
-                menu.clean(old.btn)
-            }
-        }
+        })
+        wsas.removeAll(where: { it in toRemove.contains(where: { remove in remove.app == it.app }) })
+        toRemove.forEach { remove in menu.clean(remove.btn) }
         // swap
         if let wsa = wsas.first(where: {wsa in wsa.app == activatedApp}) {
             wsas.removeAll(where: {wsa in wsa.app == activatedApp})
@@ -62,17 +61,7 @@ class WindowSwitchListener {
     
     @objc func appWillLaunch(notification: Notification) {
         Thread.sleep(forTimeInterval: 1)
-        windowDidSwitch(notification: notification)
-    }
-    
-    @objc func windowDidClose(notification: Notification) {
-        guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
-            return
-        }
-        if let wsa = wsas.first(where: { wsa in wsa.app == activatedApp}) {
-            wsas.removeAll(where: { wsa in wsa.app == activatedApp})
-            menu.clean(wsa.btn)
-        }
+        addWSA(notification: notification)
     }
 }
 
@@ -87,20 +76,19 @@ class WindowSwitchAction {
         app = application
         btn.target = self
         btn.action = #selector(switchWindow(_:))
-//        print("create WindowSwitchAction for " + (app.localizedName ?? "unkown app"))
     }
     
     deinit {
-        print("dead")
+        print((app.localizedName ?? "unkown app") + " is removed")
     }
     
     @objc func switchWindow(_ sender: NSButton) {
         let wsa = sender.target as! WindowSwitchAction
         wsa.app.activate()
         let windowElement = wsa.winEle
-        AXUIElementSetAttributeValue(windowElement, kAXMainAttribute as CFString, kCFBooleanTrue)
         AXUIElementSetAttributeValue(windowElement, kAXFocusedAttribute as CFString, kCFBooleanTrue)
         AXUIElementSetAttributeValue(windowElement, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
     }
+    
+    
 }
-

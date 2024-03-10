@@ -206,7 +206,7 @@ class WindowAction {
                 let appElement = msg.axu
                 
                 guard let windowElement = WindowAction.getSingleWindowElement(appElement) else {
-//                    debugPrint("find empty window for " + appName)
+                    //                    debugPrint("find empty window for " + appName)
                     replayApplicationElement()
                     redo(); continue
                 }
@@ -215,7 +215,7 @@ class WindowAction {
                 
                 debugPrint("center executed: " + appName)
                 activatedAppliction.insert(appName) // @audit data race
-
+                
                 
                 // remove msg
                 let removed = applicationElement.removeFirst()
@@ -240,7 +240,7 @@ class WindowAction {
                 }
                 
                 
-             
+                
                 func updateReadOnlyPid() {
                     idx += 1
                     if idx == iter {
@@ -271,7 +271,7 @@ class WindowAction {
     
     @objc func appActivateAction(_ notification: Notification) {
         if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
-//            debugPrint("activate: " + app.localizedName!)
+            //            debugPrint("activate: " + app.localizedName!)
             
             // quick path
             // nowindown application will trigger frequently
@@ -303,7 +303,7 @@ class WindowAction {
     
     @objc func appDeactivateAction(_ notification: Notification) {
         if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
-//            debugPrint("deactivate: " + app.localizedName!)
+            //            debugPrint("deactivate: " + app.localizedName!)
             
             guard let appName = app.localizedName else {
                 debugPrint("get app name failed!")
@@ -314,10 +314,10 @@ class WindowAction {
             if let windows = WindowAction.getAllWindowElement(appElement) {
                 if windows.isEmpty {
                     lock.wait()
-                        if activatedAppliction.contains(appName) {
-                            debugPrint("remove: " + appName)
-                            activatedAppliction.remove(appName)
-                        }
+                    if activatedAppliction.contains(appName) {
+                        debugPrint("remove: " + appName)
+                        activatedAppliction.remove(appName)
+                    }
                     lock.signal()
                 }
             }
@@ -340,7 +340,7 @@ class WindowAction {
         }
         
         lock.signal()
-
+        
     }
     
     
