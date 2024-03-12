@@ -16,6 +16,7 @@ class Menu {
     let busyBtn = {
         return createMenuButton(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
     }()
+    var viewRecords: [NSView] = []
     
     init() {
         statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(24))
@@ -28,17 +29,18 @@ class Menu {
     func show(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
         if view.subviews.count > 2 {
-            view.subviews.removeFirst()
+            viewRecords.append(view.subviews.removeFirst())
         }
         view.addArrangedSubview(v)
         statusItem.length = CGFloat(view.subviews.count * 24)
         view.frame.size.width = CGFloat(view.subviews.count * 24)
-
-        
     }
     
     func clean(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
+        if viewRecords.count > 0 {
+            view.insertArrangedSubview(viewRecords.removeLast(), at: 0)
+        }
         statusItem.length = CGFloat(view.subviews.count * 24)
         view.frame.size.width = CGFloat(view.subviews.count * 24)
     }

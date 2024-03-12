@@ -21,6 +21,7 @@ class WindowSwitchListener {
         let notificationCenter = NSWorkspace.shared.notificationCenter
         notificationCenter.addObserver(self, selector: #selector(addWSA(notification:)), name: NSWorkspace.didActivateApplicationNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appWillLaunch(notification:)), name: NSWorkspace.willLaunchApplicationNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(removeWSA(notification:)), name: NSWorkspace.didHideApplicationNotification, object: nil)
     }
     
     @objc func addWSA(notification: Notification) {
@@ -63,6 +64,16 @@ class WindowSwitchListener {
         Thread.sleep(forTimeInterval: 1)
         addWSA(notification: notification)
     }
+    
+    @objc func removeWSA(notification: Notification) {
+        guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
+            return
+        }
+        if let wsa = wsas.first(where: {wsa in wsa.app == activatedApp}) {
+            wsas.removeAll(where: {wsa in wsa.app == activatedApp})
+            menu.clean(wsa.btn)
+        }
+    }
 }
 
 class WindowSwitchAction {
@@ -76,6 +87,7 @@ class WindowSwitchAction {
         app = application
         btn.target = self
         btn.action = #selector(switchWindow(_:))
+        print(app.localizedName! + " is created.")
     }
     
     deinit {
@@ -88,6 +100,7 @@ class WindowSwitchAction {
         let windowElement = wsa.winEle
         AXUIElementSetAttributeValue(windowElement, kAXFocusedAttribute as CFString, kCFBooleanTrue)
         AXUIElementSetAttributeValue(windowElement, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
+        return
     }
     
     
