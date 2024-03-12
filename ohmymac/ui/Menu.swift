@@ -28,29 +28,42 @@ class Menu {
     
     func show(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
-        if view.subviews.count > 2 {
+        while view.subviews.count > 2 {
             viewRecords.append(view.subviews.removeFirst())
         }
         view.addArrangedSubview(v)
-        statusItem.length = CGFloat(view.subviews.count * 24)
-        view.frame.size.width = CGFloat(view.subviews.count * 24)
+        update()
     }
     
     func clean(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
-        if viewRecords.count > 0 {
+        viewRecords.removeAll(where: { target in target == v})
+        while view.subviews.count < 3 && viewRecords.count > 0 {
             view.insertArrangedSubview(viewRecords.removeLast(), at: 0)
         }
+        update()
+    }
+    
+    func busy() { show(busyBtn) }
+    
+    func free() { clean(busyBtn) }
+    
+    func showAll() {
+        viewRecords.forEach({ item in view.insertArrangedSubview(item, at: 0)})
+        viewRecords.removeAll()
+        update()
+    }
+    
+    func showOnly3() {
+        while view.subviews.count > 3 {
+            viewRecords.append(view.subviews.removeFirst())
+        }
+        update()
+    }
+    
+    private func update() {
         statusItem.length = CGFloat(view.subviews.count * 24)
         view.frame.size.width = CGFloat(view.subviews.count * 24)
-    }
-    
-    func busy() {
-        show(busyBtn)
-    }
-    
-    func free() {
-        clean(busyBtn)
     }
 }
 

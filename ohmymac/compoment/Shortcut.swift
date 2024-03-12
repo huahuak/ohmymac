@@ -24,7 +24,7 @@ var hotkeys = [HotKey]()
 var doing = ManagedAtomic<Int>(0)
 
 fileprivate func _init() {
-    // MARK: - window action
+    // window action
     add(HotKey(key: .l, modifiers: [.option]), { percentExec(0.75, 0.85) })
     add(HotKey(key: .semicolon, modifiers: [.option]), { percentExec(0.75) })
     add(HotKey(key: .quote, modifiers: [.option]), { percentExec(0.9) })
@@ -36,7 +36,7 @@ fileprivate func _init() {
         WindowAction.center(front)
     })
     
-    // MARK: - translate quicklook
+    // translate quicklook
     add(HotKey(key: .comma, modifiers: [.option]), {
         one { doneFn in
             let text = getScreenText()
@@ -48,7 +48,7 @@ fileprivate func _init() {
         }
     })
     
-    // MARK: - google webview
+    // google webview
     add(HotKey(key: .g, modifiers: [.option, .command]), {
         one { doneFn in
             let text = getScreenText()
@@ -56,6 +56,7 @@ fileprivate func _init() {
             openWebView(url: url) { doneFn() }
         }
     })
+    
     
     // MARK: - internal function
     func add(_ hotkey: HotKey, _ handler: @escaping () -> ()) {
