@@ -7,10 +7,10 @@
 
 import Foundation
 
-func googleSearchURL(content: String) -> URL? {
-    guard let googleURL = URL(string: "https://www.google.com.hk/search?client=safari&rls=en&q=\(content)&ie=UTF-8&oe=UTF-8") else {
-        return nil
+func googleSearch() {
+    getScreenText { text in
+        let googleURL = URL(string: "https://www.google.com.hk/search?client=safari&rls=en&q=\(text)&ie=UTF-8&oe=UTF-8")!
+        openWebView(url: googleURL)
     }
-    return googleURL
 }
 

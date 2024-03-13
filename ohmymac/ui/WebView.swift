@@ -15,9 +15,12 @@ import Atomics
 // COMMENT:
 // webview ui is used to show some url in webview.
 
-func openWebView(url: URL, callback: (() -> Void)?) {
+fileprivate let lock = Lock(before: menu.busy, after: menu.free)
+
+func openWebView(url: URL) {
+    if !lock.lock() { debugPrint("Webview is locked."); return }
     wvControler.open(url)
-    _ = fm.getFocused(WhenFinished: callback)
+    _ = fm.getFocused()
 }
 
 class WebViewController: NSViewController {
@@ -34,7 +37,6 @@ class WebViewController: NSViewController {
             
             let checkTimeInterval = 60.0
             func check() {
-                // debugPrint("check")
                 let (ok, _) = isRunning.compareExchange(expected: 0, desired: 0, ordering: .relaxed)
                 if !ok {
                     main.asyncAfter(deadline: .now() + checkTimeInterval, execute: check); return
@@ -42,7 +44,6 @@ class WebViewController: NSViewController {
                 if let wv = self.wv {
                     wv.removeFromSuperview()
                     self.wv = nil
-                    // debugPrint("wv timeout")
                 }
             }
             main.asyncAfter(deadline: .now() + checkTimeInterval, execute: check)
@@ -63,7 +64,7 @@ class WebViewController: NSViewController {
         ])
     }
     
-    func close() {
+    func releaseWebView() {
         guard let wv = wv else { return }
         
         wv.stopLoading()
@@ -122,37 +123,33 @@ fileprivate let fm = {
         let y = screen.size.height * (1 - heightPercent) * 0.66
         let width = round(screen.size.width * widthPercent)
         let height = round(screen.size.height * heightPercent)
-        //        debugPrint("screen is \(screen.size.width) * \(screen.size.height)")
-        //        debugPrint("x: \(x), y: \(y), w: \(width), h: \(height)")
         window.setFrame(NSRect(x: x, y: y, width: width, height: height), display: false, animate: true)
     }
     
     window.title = "Google Search"
     
     let fm = FocusManager(window: window)
-    
-    fm.addObserver(name: NSWindow.willCloseNotification) { notice in
-        if notice.object is NSWindow, notice.object as? NSWindow == window {
-            if let cl = fm.callback { cl() }
-            wvControler.close()
-        }
+
+    let close = {
+        fm.recoverFocused()
+        wvControler.releaseWebView()
+        if !lock.unlock() { debugPrint("wv unlock failed!"); return }
     }
     
     let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
         if event.modifierFlags.contains(.command) && event.characters == "w" {
             let (ok, _) = wvControler.isRunning.compareExchange(expected: 1, desired: 1, ordering: .relaxed)
-            if !ok {
-                return event
-            }
-            debugPrint("web view space monitor")
-            window.close()
+            if !ok { return event }
+            close()
             return nil
         }
         if event.modifierFlags.contains(.command) && event.characters == "o" {
+            let (ok, _) = wvControler.isRunning.compareExchange(expected: 1, desired: 1, ordering: .relaxed)
+            if !ok { return event }
             let wvc = fm.window.contentViewController as! WebViewController
             if let url = wvc.wv?.url {
+                close()
                 NSWorkspace.shared.open(url)
-                window.close()
                 return nil
             }
         }

@@ -12,20 +12,22 @@ import QuickLookUI
 // COMMENT:
 // quicklook ui is used to show something in a quicklook pannel.
 
-var ql = QuickLook()
+fileprivate let ql = QuickLook()
+fileprivate let lock = Lock(before: menu.busy, after: menu.free)
 
-func openQuickLook(file: URL, callback: (() -> Void)? = nil) {
+func openQuickLook(file: URL) {
+    if !lock.lock() { debugPrint("QuickLook is locked."); return }
     ql.url = file
     
     if let panel = QLPreviewPanel.shared(), 
-        fm.getFocused(WhenFinished: callback) {
+        fm.getFocused() {
             panel.dataSource = ql
             panel.makeKeyAndOrderFront(nil)
     }
 }
 
 
-class QuickLook: QLPreviewPanelDataSource {
+fileprivate class QuickLook: QLPreviewPanelDataSource {
     
     var url: URL?
     
@@ -51,9 +53,10 @@ fileprivate let fm = {
     }())
     
     fm.addObserver(name: NSWindow.willCloseNotification) { notice in
-        if notice.object is NSWindow, notice.object as? NSWindow == QLPreviewPanel.shared() {
-            if let cl = fm.callback { cl() }
-            if let w = fm.window { w.close() }
+        if notice.object is NSWindow,
+           notice.object as? NSWindow == QLPreviewPanel.shared() {
+            fm.recoverFocused()
+            if !lock.unlock() { debugPrint("ql unlock failed!"); return }
         }
     }
     

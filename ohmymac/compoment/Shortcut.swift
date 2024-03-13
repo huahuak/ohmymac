@@ -13,7 +13,7 @@ import HotKey
 // Shorcut compoment is used to listen shortcut keydown, then call some function and ui to response.
 
 func startShortcut() {
-    _init()
+    initShortcut()
     deInitFunc.append {
         hotkeys.removeAll()
     }
@@ -21,72 +21,35 @@ func startShortcut() {
 
 var hotkeys = [HotKey]()
 
-var doing = ManagedAtomic<Int>(0)
-
-fileprivate func _init() {
+fileprivate func initShortcut() {
     // window action
-    add(HotKey(key: .l, modifiers: [.option]), { percentExec(0.75, 0.85) })
-    add(HotKey(key: .semicolon, modifiers: [.option]), { percentExec(0.75) })
-    add(HotKey(key: .quote, modifiers: [.option]), { percentExec(0.9) })
-    add(HotKey(key: .m, modifiers: [.option]), { percentExec(1) })
+    add(HotKey(key: .l, modifiers: [.option]), percentExec(0.75, 0.85))
+    add(HotKey(key: .semicolon, modifiers: [.option]), percentExec(0.75))
+    add(HotKey(key: .quote, modifiers: [.option]), percentExec(0.9))
+    add(HotKey(key: .m, modifiers: [.option]), percentExec(1))
     add(HotKey(key: .c, modifiers: [.option]), {
         guard let front = WindowAction.getFrontMostWindow() else {
             debugPrint("get front most window failed, can't center window "); return
         }
         WindowAction.center(front)
     })
-    
-    // translate quicklook
-    add(HotKey(key: .comma, modifiers: [.option]), {
-        one { doneFn in
-            let text = getScreenText()
-            translate(source: text) { result in
-                guard let url = writeTmp(content: result) else { return }
-                openQuickLook(file: url) { doneFn() }
-            }
-            
-        }
-    })
-    
-    // google webview
-    add(HotKey(key: .g, modifiers: [.option, .command]), {
-        one { doneFn in
-            let text = getScreenText()
-            guard let url = googleSearchURL(content: text) else { return }
-            openWebView(url: url) { doneFn() }
-        }
-    })
-    
+    // translate
+    add(HotKey(key: .comma, modifiers: [.option]), translate)
+    // googleSearch
+    add(HotKey(key: .g, modifiers: [.option, .command]), googleSearch)
     
     // MARK: - internal function
-    func add(_ hotkey: HotKey, _ handler: @escaping () -> ()) {
+    func add(_ hotkey: HotKey, _ handler: @escaping Fn) {
         hotkey.keyDownHandler = handler
         hotkeys.append(hotkey)
     }
-    
-    func one(f: @escaping (@escaping () -> Void) -> Void) {
-        let (ok, old) = doing.compareExchange(expected: 0, desired: 1, ordering: AtomicUpdateOrdering.relaxed)
-        if !ok {
-            debugPrint("doing...")
-            return
-        }
-        main.async {
-            menu.busy()
-            f() {
-                menu.free()
-                doing.store(old, ordering: AtomicStoreOrdering.relaxed)
-                debugPrint("one done!")
-            }
-        }
-    }
-    
-
-    
 }
 
-func percentExec(_ width: Double, _ height: Double = 1) {
-    guard let frontMostWindow = WindowAction.getFrontMostWindow() else {
-        debugPrint("get front most window failed"); return
+func percentExec(_ width: Double, _ height: Double = 1) -> Fn {
+    return {
+        guard let frontMostWindow = WindowAction.getFrontMostWindow() else {
+            debugPrint("get front most window failed"); return
+        }
+        WindowAction.percent(frontMostWindow, widthPercent: width, heightPercent: height)
     }
-    WindowAction.percent(frontMostWindow, widthPercent: width, heightPercent: height)
 }

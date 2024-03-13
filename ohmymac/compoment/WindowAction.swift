@@ -186,9 +186,7 @@ class WindowAction {
             if AXUIElementCopyAttributeValue(axuapp, NSAccessibility.Attribute.focusedUIElement.rawValue as CFString, &axuFocused) == .success &&
                 AXUIElementCopyAttributeValue(axuFocused as! AXUIElement, NSAccessibility.Attribute.selectedText.rawValue as CFString, &axuSelected) == .success
             {
-                if let selectText = axuSelected as? String {
-                    return selectText
-                }
+                if let selectText = axuSelected as? String { return selectText }
             }
         }
         return nil
@@ -201,7 +199,6 @@ class WindowAction {
         pointer.deallocate()
         return success ? value : nil
     }
-    
     // ------------------------------------ //
     // instance method
     private struct msg {

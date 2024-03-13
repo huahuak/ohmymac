@@ -8,52 +8,37 @@
 import Cocoa
 
 
-// MARK: - get text
-func getScreenText() -> String {
-    return WindowAction.getSelectedText() ?? {
-        executeCopy()
-        Thread.sleep(forTimeInterval: 0.1)
-        return getClipBordText() ?? ""
-    }()
+func translate() {
+    getScreenText { text in
+        if let html = internalTranslate(source: text),
+           let url = writeTmp(content: html) {
+            openQuickLook(file: url)
+        }
+    }
 }
 
-func executeCopy() {
-    // Simulate Command+C key press
-    let source = CGEventSource(stateID: .hidSystemState)
-    let keyDownEvent = CGEvent(keyboardEventSource: source, virtualKey: 8, keyDown: true)
-    let keyUpEvent = CGEvent(keyboardEventSource: source, virtualKey: 8, keyDown: false)
-    keyDownEvent?.flags = .maskCommand
-    keyUpEvent?.flags = .maskCommand
-    keyDownEvent?.post(tap: .cghidEventTap)
-    keyUpEvent?.post(tap: .cghidEventTap)
-}
-
-func getClipBordText() -> String? {
-    let clipboardText = NSPasteboard.general.string(forType: .string)
-    return clipboardText
-}
-
-// MARK: - translate
-func translate(source: String, using: @escaping (String) -> Void) {
+fileprivate func internalTranslate(source: String) -> String? {
     do {
         let translator =  Process()
         translator.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        translator.arguments = ["-c", "echo '\(source)' | shortcuts run apple-translator -i - | tee"]
+        translator.arguments = ["-c", "echo \"\(source)\" | shortcuts run apple-translator -i - | tee"]
         let output = Pipe()
         translator.standardOutput = output
         try translator.run()
         let outputData = output.fileHandleForReading.readDataToEndOfFile()
         if let translated = String(data: outputData, encoding: .utf8) {
             let html =  createHTML(source: source, translated: translated)
-            using(html)
+            return html
         }
     } catch let error {
         debugPrint("run shortcut failed, \(error)")
     }
+    return nil
 }
 
 
-func createHTML(source: String, translated: String) -> String {
+
+fileprivate func createHTML(source: String, translated: String) -> String {
     var html = """
     <!DOCTYPE html>
     <html>

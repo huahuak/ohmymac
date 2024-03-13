@@ -16,6 +16,7 @@ class Menu {
     let busyBtn = {
         return createMenuButton(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
     }()
+    let busyBtnLock = Lock()
     var viewRecords: [NSView] = []
     
     init() {
@@ -44,9 +45,22 @@ class Menu {
         update()
     }
     
-    func busy() { show(busyBtn) }
+    func busy() {
+        if busyBtnLock.lock() {
+            show(busyBtn)
+        } else {
+            busyBtnLock.p()
+        }
+    }
     
-    func free() { clean(busyBtn) }
+    func free() {
+        if busyBtnLock.unlock() {
+            clean(busyBtn)
+        } else {
+            busyBtnLock.v()
+        }
+        
+    }
     
     func showAll() {
         viewRecords.forEach({ item in view.insertArrangedSubview(item, at: 0)})
@@ -91,7 +105,6 @@ func randomIcon() -> NSImage {
     """
     let iconList = iconString.split(separator: "\n").map({ $0.trimmingCharacters(in: [" "])})
     return NSImage(systemSymbolName: iconList[Int.random(in: 0...iconList.count-1)], accessibilityDescription: nil)!
-    
 }
 
 

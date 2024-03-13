@@ -11,6 +11,7 @@ import Foundation
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         requestAccessibilityPermission()
 //        startWindowAction()

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		471C10B02B9CD0A000B645DC /* RencentWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471C10AF2B9CD0A000B645DC /* RencentWindow.swift */; };
+		473715322BA21245003275F2 /* SelectText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473715312BA21245003275F2 /* SelectText.swift */; };
 		4741D89E2B97083100743990 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D89D2B97083100743990 /* HotKey */; };
 		4741D8A12B97088900743990 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D8A02B97088900743990 /* Atomics */; };
 		475247712B96DA040084460B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 475247702B96DA040084460B /* Assets.xcassets */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		471C10AF2B9CD0A000B645DC /* RencentWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RencentWindow.swift; sourceTree = "<group>"; };
+		473715312BA21245003275F2 /* SelectText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectText.swift; sourceTree = "<group>"; };
 		475247692B96DA030084460B /* ohmymac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ohmymac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475247702B96DA040084460B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		475247752B96DA040084460B /* ohmymac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ohmymac.entitlements; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 			children = (
 				475247A12B96DDF70084460B /* GoogleSearch.swift */,
 				475247A32B96DDF70084460B /* Translate.swift */,
+				473715312BA21245003275F2 /* SelectText.swift */,
 			);
 			path = function;
 			sourceTree = "<group>";
@@ -205,6 +208,7 @@
 				475247A82B96DDF70084460B /* WebView.swift in Sources */,
 				475247A62B96DDF70084460B /* TmpFile.swift in Sources */,
 				4752478E2B96DC860084460B /* Common.swift in Sources */,
+				473715322BA21245003275F2 /* SelectText.swift in Sources */,
 				475247912B96DC860084460B /* WindowAction.swift in Sources */,
 				4752478D2B96DC860084460B /* Menu.swift in Sources */,
 				475247902B96DC860084460B /* main.swift in Sources */,
@@ -346,7 +350,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -357,7 +361,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -377,7 +381,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -388,7 +392,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.2;
+				MARKETING_VERSION = 1.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
