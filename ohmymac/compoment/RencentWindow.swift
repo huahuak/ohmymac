@@ -8,11 +8,13 @@
 import Foundation
 import AppKit
 
-func startRecentWindow() {
-    
+var rwm: Any?
+
+func startRecentWindowManger() {
+    rwm = RecentWindowManager()
 }
 
-class WindowSwitchListener {
+class RecentWindowManager {
     var observer: AXObserver?
     var wsas: [WindowSwitchAction] = []
     var rwsas: [WindowSwitchAction] = []
@@ -25,17 +27,38 @@ class WindowSwitchListener {
     init() {
         let notificationCenter = NSWorkspace.shared.notificationCenter
         notificationCenter.addObserver(self, selector: #selector(addWSA(notification:)), name: NSWorkspace.didActivateApplicationNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(addWSA(notification:)), name: NSWorkspace.didUnhideApplicationNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appWillLaunch(notification:)), name: NSWorkspace.willLaunchApplicationNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(removeWSA(notification:)), name: NSWorkspace.didHideApplicationNotification, object: nil)
-        
+        NSWorkspace.shared.runningApplications.forEach({ app in
+            if app.isHidden { return }
+            global.async {
+                let axApp = AXUIElementCreateApplication(app.processIdentifier)
+                if let axWin = WindowAction.getSingleWindowElement(axApp) {
+                    main.async { [self] in
+                        app.icon?.size = NSSize(width: 22, height: 22)
+                        let wsa = WindowSwitchAction(app.icon!, windowElement: axWin, application: app)
+                        wsas.append(wsa)
+                        menu.show(wsa.btn)
+                    }
+                }
+            }
+        })
+        deInitFunc.append {
+            notificationCenter.removeObserver(self)
+        }
     }
     
     @objc func addWSA(notification: Notification) {
         guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
             return
         }
-        Thread.sleep(forTimeInterval: 0.2)
-        guard let frontMostWindow = WindowAction.getFrontMostWindow() else {
+        var frontMostWindow = WindowAction.getFrontMostWindow()
+        if frontMostWindow == nil {
+            Thread.sleep(forTimeInterval: 0.2)
+            frontMostWindow = WindowAction.getFrontMostWindow()
+        }
+        guard let frontMostWindow = frontMostWindow else {
             debugPrint("get front most window failed"); return
         }
         // check
@@ -49,8 +72,8 @@ class WindowSwitchListener {
                 toRemove.append(it)
             }
         })
+        toRemove.forEach { remove in menu.clean(remove.btn); rwsas.append(remove) }
         wsas.removeAll(where: { it in toRemove.contains(where: { remove in remove.app == it.app }) })
-        toRemove.forEach { remove in menu.clean(remove.btn) }
         // swap
         if let wsa = wsas.first(where: {wsa in wsa.app == activatedApp}) {
             wsas.removeAll(where: {wsa in wsa.app == activatedApp})
@@ -60,10 +83,16 @@ class WindowSwitchListener {
             return
         }
         // append
-        activatedApp.icon?.size = NSSize(width: 22, height: 22)
-        let wsa = WindowSwitchAction(activatedApp.icon!, windowElement: frontMostWindow, application: activatedApp)
-        wsas.append(wsa)
-        menu.show(wsa.btn)
+        if let wsa = rwsas.first(where: { it in it.app == activatedApp}) {
+            rwsas.removeAll(where: { it in it.app == activatedApp})
+            wsas.append(wsa)
+            menu.show(wsa.btn)
+        } else {
+            activatedApp.icon?.size = NSSize(width: 22, height: 22)
+            let wsa = WindowSwitchAction(activatedApp.icon!, windowElement: frontMostWindow, application: activatedApp)
+            wsas.append(wsa)
+            menu.show(wsa.btn)
+        }
     }
     
     @objc func appWillLaunch(notification: Notification) {
@@ -76,8 +105,9 @@ class WindowSwitchListener {
             return
         }
         if let wsa = wsas.first(where: {wsa in wsa.app == activatedApp}) {
-            wsas.removeAll(where: {wsa in wsa.app == activatedApp})
+            rwsas.append(wsa)
             menu.clean(wsa.btn)
+            wsas.removeAll(where: {wsa in wsa.app == activatedApp})
         }
     }
 }
@@ -108,8 +138,6 @@ class WindowSwitchAction {
         AXUIElementSetAttributeValue(windowElement, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
         return
     }
-    
-    
 }
 
 class WindowSwitchShortcut {

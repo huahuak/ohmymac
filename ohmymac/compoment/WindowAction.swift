@@ -91,6 +91,19 @@ class WindowAction {
         }
     }
     
+    static func getMainWindowElement(_ applicationElement: AXUIElement) -> AXUIElement? {
+        // main window
+        var windowElementBuf: AnyObject?
+        let res = AXUIElementCopyAttributeValue(applicationElement, NSAccessibility.Attribute.mainWindow.rawValue as CFString, &windowElementBuf)
+        guard res == .success else {
+            return nil
+        }
+        if windowElementBuf != nil {
+            return (windowElementBuf as! AXUIElement)
+        }
+        return nil
+    }
+    
     static func getSingleWindowElement(_ applicationElement: AXUIElement) -> AXUIElement? {
         var windowElementBuf: AnyObject?
         // focused window
@@ -163,6 +176,22 @@ class WindowAction {
             return isMinimized
         }
         return false
+    }
+    
+    static func getSelectedText() -> String? {
+        if let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier {
+            let axuapp = AXUIElementCreateApplication(pid)
+            var axuFocused: AnyObject?
+            var axuSelected: AnyObject?
+            if AXUIElementCopyAttributeValue(axuapp, NSAccessibility.Attribute.focusedUIElement.rawValue as CFString, &axuFocused) == .success &&
+                AXUIElementCopyAttributeValue(axuFocused as! AXUIElement, NSAccessibility.Attribute.selectedText.rawValue as CFString, &axuSelected) == .success
+            {
+                if let selectText = axuSelected as? String {
+                    return selectText
+                }
+            }
+        }
+        return nil
     }
     
     private static func toValue<T>(ax: AXValue) -> T? {

@@ -8,9 +8,7 @@
 import AppKit
 
 let app = NSApplication.shared
+let menu = Menu()
 let delegate = AppDelegate()
 app.delegate = delegate
-
-let menu = Menu()
-
 app.run()

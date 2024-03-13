@@ -10,9 +10,11 @@ import Cocoa
 
 // MARK: - get text
 func getScreenText() -> String {
-    executeCopy()
-    Thread.sleep(forTimeInterval: 0.05)
-    return getClipBordText() ?? ""
+    return WindowAction.getSelectedText() ?? {
+        executeCopy()
+        Thread.sleep(forTimeInterval: 0.1)
+        return getClipBordText() ?? ""
+    }()
 }
 
 func executeCopy() {
@@ -20,10 +22,8 @@ func executeCopy() {
     let source = CGEventSource(stateID: .hidSystemState)
     let keyDownEvent = CGEvent(keyboardEventSource: source, virtualKey: 8, keyDown: true)
     let keyUpEvent = CGEvent(keyboardEventSource: source, virtualKey: 8, keyDown: false)
-    
     keyDownEvent?.flags = .maskCommand
     keyUpEvent?.flags = .maskCommand
-    
     keyDownEvent?.post(tap: .cghidEventTap)
     keyUpEvent?.post(tap: .cghidEventTap)
 }
@@ -36,13 +36,17 @@ func getClipBordText() -> String? {
 // MARK: - translate
 func translate(source: String, using: @escaping (String) -> Void) {
     do {
-        try Process.run(
-            URL(fileURLWithPath: "/usr/bin/shortcuts"),
-            arguments: ["run", "apple-translator"]
-        ).waitUntilExit()
-        let translated = getClipBordText() ?? "empty"
-        let html =  createHTML(source: source, translated: translated)
-        using(html)
+        let translator =  Process()
+        translator.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        translator.arguments = ["-c", "echo '\(source)' | shortcuts run apple-translator -i - | tee"]
+        let output = Pipe()
+        translator.standardOutput = output
+        try translator.run()
+        let outputData = output.fileHandleForReading.readDataToEndOfFile()
+        if let translated = String(data: outputData, encoding: .utf8) {
+            let html =  createHTML(source: source, translated: translated)
+            using(html)
+        }
     } catch let error {
         debugPrint("run shortcut failed, \(error)")
     }
@@ -53,7 +57,7 @@ func createHTML(source: String, translated: String) -> String {
     var html = """
     <!DOCTYPE html>
     <html>
-
+    
     <head>
       <meta charset="UTF-8">
       <title>Translation</title>
@@ -63,7 +67,7 @@ func createHTML(source: String, translated: String) -> String {
           font-weight: 300;
           line-height: 32px;
         }
-
+    
         #article {
           box-shadow: 0px 6px 12px 3px rgba(0, 0, 0, 0.2);
           background: white;
@@ -71,15 +75,15 @@ func createHTML(source: String, translated: String) -> String {
           max-width: 100ex;
           margin: 22px auto;
         }
-
+    
         #page {
           background-color: white;
           margin: auto 1.5rem;
           padding-top: 53px;
           padding-bottom: 45px;
-
+    
         }
-
+    
         .left {
           width: 50%;
           padding-right: 0.8rem;
@@ -87,7 +91,7 @@ func createHTML(source: String, translated: String) -> String {
           word-wrap: break-word;
           border-right: 1px solid #12593f;
         }
-
+    
         .right {
           width: 50%;
           padding-left: 0.8rem;
@@ -95,13 +99,13 @@ func createHTML(source: String, translated: String) -> String {
           word-wrap: break-word;
           border-left: 1px solid #12593f;
         }
-
+    
         .box {
           display: flex;
         }
       </style>
     </head>
-
+    
     <body style="background: rgb(220,220,220);">
       <div id="article">
         <div id="page">
@@ -157,7 +161,7 @@ func createHTML(source: String, translated: String) -> String {
                 </div>
               </div>
             </body>
-
+    
             </html>
     """
     return html

@@ -11,12 +11,11 @@ import Foundation
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     
-    let listener = WindowSwitchListener()
-    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         requestAccessibilityPermission()
 //        startWindowAction()
         startShortcut()
+        startRecentWindowManger()
         NSApp.setActivationPolicy(.accessory)
         NSApp.activate(ignoringOtherApps: true)
     }
