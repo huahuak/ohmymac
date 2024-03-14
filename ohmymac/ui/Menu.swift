@@ -17,7 +17,7 @@ class Menu {
         return createMenuButton(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
     }()
     let busyBtnLock = Lock()
-    var viewRecords: [NSView] = []
+    var viewRecordsStack: [NSView] = []
     
     init() {
         statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(24))
@@ -30,7 +30,12 @@ class Menu {
     func show(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
         while view.subviews.count > 2 {
-            viewRecords.append(view.subviews.removeFirst())
+            viewRecordsStack.append({
+                let first = view.arrangedSubviews.first!
+                view.removeArrangedSubview(first)
+                first.removeFromSuperview()
+                return first
+            }())
         }
         view.addArrangedSubview(v)
         update()
@@ -38,9 +43,9 @@ class Menu {
     
     func clean(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
-        viewRecords.removeAll(where: { target in target == v})
-        while view.subviews.count < 3 && viewRecords.count > 0 {
-            view.insertArrangedSubview(viewRecords.removeLast(), at: 0)
+        viewRecordsStack.removeAll(where: { target in target == v})
+        while view.subviews.count < 3 && viewRecordsStack.count > 0 {
+            view.insertArrangedSubview(viewRecordsStack.removeLast(), at: 0)
         }
         update()
     }
@@ -63,14 +68,19 @@ class Menu {
     }
     
     func showAll() {
-        viewRecords.forEach({ item in view.insertArrangedSubview(item, at: 0)})
-        viewRecords.removeAll()
+        viewRecordsStack.forEach({ item in view.insertArrangedSubview(item, at: 0)})
+        viewRecordsStack.removeAll()
         update()
     }
     
     func showOnly3() {
         while view.subviews.count > 3 {
-            viewRecords.append(view.subviews.removeFirst())
+            viewRecordsStack.append({
+                let first = view.arrangedSubviews.first!
+                view.removeArrangedSubview(first)
+                first.removeFromSuperview()
+                return first
+            }())
         }
         update()
     }
