@@ -2,7 +2,23 @@
 
 [ohmymac](https://github.com/huahuak/ohmymac) is a statusbar-only application, which is used to extend functionality of mac.
 
+*ohmymac is currently under development.*
+
 ##  For now
+
+### Window
+
+- You will find the most recent three windows in the menu bar.
+
+  ![Screenshot 2024-03-14 at 23.09.30](README.assets/Screenshot%202024-03-14%20at%2023.09.30.png)
+
+- `cmd+tab` has been overwritten by ohmymac, when you press `cmd+tab`, the menubar will show a list of all windows, and it will hightlight the selected window.
+
+  (In the fucture, you may be able to choose your custom shortcut instead of `cmd+tab`)
+
+  ![Screenshot 2024-03-14 at 23.12.15](README.assets/Screenshot%202024-03-14%20at%2023.12.15-0429150.png)
+
+- When the mouse enters the menu bar area of ohmymac, the menu bar will show a list of all windows, and it will hide when the mouse exits.
 
 ### Shortcut
 
@@ -26,4 +42,3 @@
 
   ## Features
 
-- The menu icon may be selected randomly.
