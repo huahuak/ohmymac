@@ -13,18 +13,35 @@ import Cocoa
 class Menu {
     let statusItem: NSStatusItem
     let view: NSStackView
+    var trackArea: NSTrackingArea?
+    let trackAreaLock = Lock()
     let busyBtn = {
         return createMenuButton(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
     }()
     let busyBtnLock = Lock()
     var viewRecordsStack: [NSView] = []
     
+    
     init() {
         statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(24))
-        view = NSStackView(frame: NSRect(x: 0, y: 0, width: 72, height: 24))
+        view = NSStackView(frame: NSRect(x: 0, y: 0, width: 72, height: 22))
         view.orientation = .horizontal
         view.distribution = .fillEqually
-        statusItem.button?.addSubview(view)
+        guard let button = statusItem.button else { return }
+        button.addSubview(view)
+        trackArea = NSTrackingArea(
+            rect: button.bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
+        button.addTrackingArea(trackArea!)
+    }
+    
+    @objc(mouseEntered:) func mouseEntered(with event: NSEvent) {
+        if !trackAreaLock.lock() { return }
+        showAll()
+    }
+    
+    @objc(mouseExited:) func mouseExited(with event: NSEvent) {
+        if !trackAreaLock.unlock() { return }
+        showOnly3()
     }
     
     func show(_ v: NSView) {
@@ -88,6 +105,13 @@ class Menu {
     private func update() {
         statusItem.length = CGFloat(view.subviews.count * 24)
         view.frame.size.width = CGFloat(view.subviews.count * 24)
+        if let trackArea = trackArea,
+           let button = statusItem.button {
+            button.removeTrackingArea(trackArea)
+            self.trackArea = NSTrackingArea(
+                rect: button.bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
+            button.addTrackingArea(self.trackArea!)
+        }
     }
 }
 
