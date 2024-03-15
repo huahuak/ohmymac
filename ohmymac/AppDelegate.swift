@@ -14,6 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         requestAccessibilityPermission()
+        setupCrashHandler()
 //        startWindowAction()
         startShortcut()
         startRecentWindowManger()
@@ -34,6 +35,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             debugPrint("Accessibility permission denied.")
             // @todo send a notification
             exit(ErrCode.NoPermission)
+        }
+    }
+    
+    func setupCrashHandler() {
+        NSSetUncaughtExceptionHandler { exception in
+            _ = writeTmp(content: exception.callStackSymbols.joined(separator: "\n"))
         }
     }
 }

@@ -37,7 +37,13 @@ class RecentWindowManager {
                 if let axWin = WindowAction.getSingleWindowElement(axApp) {
                     main.async { [self] in
                         app.icon?.size = NSSize(width: 22, height: 22)
-                        let wsa = WindowSwitchAction(app.icon!, windowElement: axWin, application: app)
+                        let icon = app.icon ?? randomIcon()
+                        // for debug
+                        if app.icon == nil {
+                            openQuickLook(file: writeTmp(content: app.localizedName ?? "unkown app")!)
+                        }
+                        // end for debug
+                        let wsa = WindowSwitchAction(icon, windowElement: axWin, application: app)
                         wsas.append(wsa)
                         menu.show(wsa.btn)
                     }
@@ -89,7 +95,13 @@ class RecentWindowManager {
             menu.show(wsa.btn)
         } else {
             activatedApp.icon?.size = NSSize(width: 22, height: 22)
-            let wsa = WindowSwitchAction(activatedApp.icon!, windowElement: frontMostWindow, application: activatedApp)
+            let icon = activatedApp.icon ?? randomIcon()
+            // for debug
+            if activatedApp.icon == nil {
+                openQuickLook(file: writeTmp(content: activatedApp.localizedName ?? "unkown app")!)
+            }
+            // end for debug
+            let wsa = WindowSwitchAction(icon, windowElement: frontMostWindow, application: activatedApp)
             wsas.append(wsa)
             menu.show(wsa.btn)
         }

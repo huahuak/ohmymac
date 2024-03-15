@@ -21,7 +21,11 @@ fileprivate func internalTranslate(source: String) -> String? {
     do {
         let translator =  Process()
         translator.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        translator.arguments = ["-c", "echo \"\(source)\" | shortcuts run apple-translator -i - | tee"]
+        let copy = source
+            .replacingOccurrences(of: "\'", with: "\'")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        let cmd = "echo \"\(copy)\" | shortcuts run apple-translator -i - | tee"
+        translator.arguments = ["-c", cmd]
         let output = Pipe()
         translator.standardOutput = output
         try translator.run()
