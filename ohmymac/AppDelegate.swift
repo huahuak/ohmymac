@@ -7,6 +7,8 @@
 
 import Cocoa
 import Foundation
+import UserNotifications
+
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
@@ -35,6 +37,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             debugPrint("Accessibility permission denied.")
             // @todo send a notification
             exit(ErrCode.NoPermission)
+        }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.badge]) { granted, error in
+            if granted {
+                print("Notification authorization granted")
+            } else {
+                print("Notification authorization denied")
+            }
         }
     }
     

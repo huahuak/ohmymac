@@ -235,6 +235,8 @@ class WindowSwitchShortcut {
     
     var doing = false
     var cnt = 1
+    var eventTap: CFMachPort?
+    
     static func get (_ idx: Int) -> NSButton {
         let reverse = menu.view.subviews.count - 1 - (idx % menu.view.subviews.count)
         return menu.view.arrangedSubviews[reverse] as! NSButton
@@ -255,26 +257,32 @@ class WindowSwitchShortcut {
     static func startCGEvent(wss: inout WindowSwitchShortcut) {
         func myCGEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
             let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(refcon!).takeUnretainedValue()
+            if type == .tapDisabledByTimeout {
+                main.async {
+                    notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
+                }
+                if let eventTap = wss.eventTap {
+                    CGEvent.tapEnable(tap: eventTap, enable: true)
+                }
+            }
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             if !wss.doing && keyCode == 48 && event.flags.contains(.maskCommand) { // cmd + tab
                 wss.doing = true
-                wss.start()
+                main.async { wss.start() }
                 return nil
             }
             if wss.doing && keyCode == 48 && event.flags.contains(.maskCommand) {
                 wss.cnt += 1
-                wss.next(wss.cnt)
+                main.async { wss.next(wss.cnt) }
                 return nil
             }
             if wss.doing && !event.flags.contains(.maskCommand) {
                 wss.doing = false
-                wss.end(wss.cnt)
+                main.async { wss.end(wss.cnt) }
                 wss.cnt = 1
                 return nil
             }
-
             return Unmanaged.passUnretained(event)
-        
         }
         
         let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
@@ -289,10 +297,10 @@ class WindowSwitchShortcut {
             exit(1)
         }
         
+        wss.eventTap = eventTap
         let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: eventTap, enable: true)
-//        CFRunLoopRun()
     }
 }
 
