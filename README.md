@@ -8,6 +8,10 @@
 
 ### Window
 
+> ‼️ WARNNING
+>
+> Disable the Stage Manager
+
 - You will find the most recent three windows in the menu bar.
 
   ![Screenshot 2024-03-14 at 23.09.30](README.assets/Screenshot%202024-03-14%20at%2023.09.30.png)

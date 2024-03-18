@@ -26,6 +26,10 @@ func openQuickLook(file: URL) {
     }
 }
 
+func qlMessage(msg: String) {
+    openQuickLook(file: writeTmp(content: msg)!)
+}
+
 
 fileprivate class QuickLook: QLPreviewPanelDataSource {
     

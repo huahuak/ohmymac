@@ -8,7 +8,7 @@
 import Foundation
 import AppKit
 
-var rwm: Any?
+var rwm: RecentWindowManager?
 
 func startRecentWindowManger() {
     rwm = RecentWindowManager()
@@ -17,41 +17,50 @@ func startRecentWindowManger() {
 class RecentWindowManager {
     var observer: AXObserver?
     var wsas: [WindowSwitchAction] = []
+    var iHide: [WindowSwitchAction] = []
     var rwsas: [WindowSwitchAction] = []
     let wss: WindowSwitchShortcut = {
         var wss = WindowSwitchShortcut()
         WindowSwitchShortcut.startCGEvent(wss: &wss)
         return wss
     }()
+    var unhideOB: Any? = nil
     
     init() {
         let notificationCenter = NSWorkspace.shared.notificationCenter
-        notificationCenter.addObserver(self, selector: #selector(addWSA(notification:)), name: NSWorkspace.didActivateApplicationNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(addWSA(notification:)), name: NSWorkspace.didUnhideApplicationNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(appWillLaunch(notification:)), name: NSWorkspace.willLaunchApplicationNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(removeWSA(notification:)), name: NSWorkspace.didHideApplicationNotification, object: nil)
+        let activeOB = notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil) { [self] notification in
+                addWSA(notification: notification)
+        }
+        let launchOB = notificationCenter.addObserver(
+            forName: NSWorkspace.willLaunchApplicationNotification, object: nil, queue: nil) { [self] notification in
+                Thread.sleep(forTimeInterval: 1)
+                addWSA(notification: notification)
+        }
+        unhideOB = notificationCenter.addObserver(
+            forName: NSWorkspace.didUnhideApplicationNotification, object: nil, queue: nil) { [self] notification in
+                addWSA(notification: notification)
+        }
+        notificationCenter.addObserver(self, selector:
+                                        #selector(removeWSA(notification:)),
+                                       name: NSWorkspace.didHideApplicationNotification, 
+                                       object: nil)
         NSWorkspace.shared.runningApplications.forEach({ app in
             if app.isHidden { return }
             global.async {
                 let axApp = AXUIElementCreateApplication(app.processIdentifier)
                 if let axWin = WindowAction.getSingleWindowElement(axApp) {
                     main.async { [self] in
-                        app.icon?.size = NSSize(width: 22, height: 22)
-                        let icon = app.icon ?? randomIcon()
-                        // for debug
-                        if app.icon == nil {
-                            openQuickLook(file: writeTmp(content: app.localizedName ?? "unkown app")!)
-                        }
-                        // end for debug
-                        let wsa = WindowSwitchAction(icon, windowElement: axWin, application: app)
-                        wsas.append(wsa)
-                        menu.show(wsa.btn)
+                        append(activatedApp: app, frontMostWindow: axWin)
                     }
                 }
             }
         })
-        deInitFunc.append {
+        deInitFunc.append { [self] in
             notificationCenter.removeObserver(self)
+            notificationCenter.removeObserver(launchOB)
+            notificationCenter.removeObserver(activeOB)
+            if let unhideOB = unhideOB { notificationCenter.removeObserver(unhideOB) }
         }
     }
     
@@ -67,64 +76,110 @@ class RecentWindowManager {
         guard let frontMostWindow = frontMostWindow else {
             debugPrint("get front most window failed"); return
         }
-        // check
-        if activatedApp.localizedName == "ohmymac" {
-            return
-        }
-        var toRemove: [WindowSwitchAction] = []
-        wsas.forEach({ it in
-            if WindowAction.getSingleWindowElement(
-                AXUIElementCreateApplication(it.app.processIdentifier)) == nil {
-                toRemove.append(it)
-            }
+        if activatedApp.localizedName == "ohmymac" { return }
+        internalShow()
+        removeAll(cond: { wsa in
+            return WindowAction.getSingleWindowElement(
+                AXUIElementCreateApplication(wsa.app.processIdentifier)) == nil
         })
-        toRemove.forEach { remove in menu.clean(remove.btn); rwsas.append(remove) }
-        wsas.removeAll(where: { it in toRemove.contains(where: { remove in remove.app == it.app }) })
-        // swap
-        if let wsa = wsas.first(where: {wsa in wsa.app == activatedApp}) {
-            wsas.removeAll(where: {wsa in wsa.app == activatedApp})
-            wsas.append(wsa)
-            wsa.winEle = frontMostWindow
-            menu.show(wsa.btn)
-            return
-        }
-        // append
-        if let wsa = rwsas.first(where: { it in it.app == activatedApp}) {
-            rwsas.removeAll(where: { it in it.app == activatedApp})
-            wsas.append(wsa)
-            menu.show(wsa.btn)
-        } else {
-            activatedApp.icon?.size = NSSize(width: 22, height: 22)
-            let icon = activatedApp.icon ?? randomIcon()
-            // for debug
-            if activatedApp.icon == nil {
-                openQuickLook(file: writeTmp(content: activatedApp.localizedName ?? "unkown app")!)
-            }
-            // end for debug
-            let wsa = WindowSwitchAction(icon, windowElement: frontMostWindow, application: activatedApp)
-            wsas.append(wsa)
-            menu.show(wsa.btn)
-        }
-    }
-    
-    @objc func appWillLaunch(notification: Notification) {
-        Thread.sleep(forTimeInterval: 1)
-        addWSA(notification: notification)
+        append(activatedApp: activatedApp, frontMostWindow: frontMostWindow)
     }
     
     @objc func removeWSA(notification: Notification) {
         guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
             return
         }
-        if let wsa = wsas.first(where: {wsa in wsa.app == activatedApp}) {
-            rwsas.append(wsa)
-            menu.clean(wsa.btn)
-            wsas.removeAll(where: {wsa in wsa.app == activatedApp})
+        removeAll(cond: {wsa in wsa.app == activatedApp})
+    }
+    
+    func internalHide(show: WindowSwitchAction) {
+        if iHide.count > 0 {
+            qlMessage(msg: "BUG: iHide locked")
+            return
         }
+        let cond = { (wsa: WindowSwitchAction) in
+            return wsa != show
+        }
+        wsas.forEach({ wsa in
+            if !cond(wsa) { return }
+            let img = wsa.btn.image
+            wsa.btn.image = img?.convertToGrayScale()
+            iHide.append(wsa)
+        })
+        wsas.removeAll(where: cond)
+        iHide.forEach({ wsa in wsa.app.hide() })
+    }
+    
+    func internalShow() {
+        if iHide.isEmpty { return }
+        let disableUnhideNotification = { [self] (f: Fn) in
+            NSWorkspace.shared.notificationCenter.removeObserver(unhideOB!)
+            f()
+            main.async {
+                self.unhideOB = NSWorkspace.shared.notificationCenter
+                    .addObserver(
+                        forName: NSWorkspace.didUnhideApplicationNotification,
+                        object: nil, queue: nil, using: self.addWSA)
+            }
+        }
+        disableUnhideNotification {
+            iHide.reversed().forEach({ wsa in
+                if let icon = wsa.app.icon {
+                    wsa.btn.image = icon
+                }
+                wsas.insert(wsa, at: 0)
+                wsa.app.unhide()
+            })
+            iHide.removeAll()
+        }
+    }
+    
+    func removeAll(cond: (WindowSwitchAction) -> Bool) {
+        var toRemove: [WindowSwitchAction] = []
+        wsas.forEach({ wsa in
+            if cond(wsa) {
+                toRemove.append(wsa)
+            }
+        })
+        
+        toRemove.forEach({ rm in menu.clean(rm.btn); rwsas.append(rm)})
+        wsas.removeAll(where: cond)
+    }
+    
+    func append(activatedApp: NSRunningApplication, frontMostWindow: AXUIElement) {
+        // swap
+        let cond = { (wsa: WindowSwitchAction) in
+            wsa.app == activatedApp
+        }
+        if let wsa = wsas.first(where: cond) {
+            wsas.removeAll(where: cond)
+            wsas.append(wsa)
+            wsa.winEle = frontMostWindow
+            menu.show(wsa.btn)
+            return
+        }
+        // cache
+        if let wsa = rwsas.first(where: cond) {
+            rwsas.removeAll(where: cond)
+            wsas.append(wsa)
+            menu.show(wsa.btn)
+            return
+        }
+        
+        activatedApp.icon?.size = NSSize(width: 22, height: 22)
+        let icon = activatedApp.icon ?? randomIcon()
+        // for debug
+        if activatedApp.icon == nil {
+            openQuickLook(file: writeTmp(content: activatedApp.localizedName ?? "unkown app")!)
+        }
+        // end for debug
+        let wsa = WindowSwitchAction(icon, windowElement: frontMostWindow, application: activatedApp)
+        wsas.append(wsa)
+        menu.show(wsa.btn)
     }
 }
 
-class WindowSwitchAction {
+class WindowSwitchAction: Equatable {
     let btn: NSButton
     var winEle: AXUIElement
     let app: NSRunningApplication
@@ -135,20 +190,44 @@ class WindowSwitchAction {
         app = application
         btn.target = self
         btn.action = #selector(switchWindow(_:))
+        btn.sendAction(on: [.leftMouseUp])
         print(app.localizedName! + " is created.")
     }
     
     deinit {
         print((app.localizedName ?? "unkown app") + " is removed")
+        menu.clean(btn) // BUG
     }
     
+    @objc func handleThreeFingerSwipe(_ gestureRecognizer: NSGestureRecognizer) {
+            if gestureRecognizer.state == .ended {
+                print("Three-finger swipe detected!")
+            }
+        }
+    
     @objc func switchWindow(_ sender: NSButton) {
-        let wsa = sender.target as! WindowSwitchAction
-        wsa.app.activate()
-        let windowElement = wsa.winEle
-        AXUIElementSetAttributeValue(windowElement, kAXFocusedAttribute as CFString, kCFBooleanTrue)
-        AXUIElementSetAttributeValue(windowElement, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
+        let sw = {
+            let wsa = sender.target as! WindowSwitchAction
+            wsa.app.activate()
+            let windowElement = wsa.winEle
+            AXUIElementSetAttributeValue(windowElement, kAXFocusedAttribute as CFString, kCFBooleanTrue)
+            AXUIElementSetAttributeValue(windowElement, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
+        }
+        let hideOtherOnlyOnce = { [rwm] in
+            main.async { rwm?.internalHide(show: self) }
+        }
+        if let event = NSApp.currentEvent {
+            sw()
+            if event.modifierFlags.contains(.option) {
+                hideOtherOnlyOnce()
+            }
+        }
+
         return
+    }
+    
+    static func == (lhs: WindowSwitchAction, rhs: WindowSwitchAction) -> Bool {
+        return lhs.app == rhs.app
     }
 }
 
@@ -218,3 +297,26 @@ class WindowSwitchShortcut {
 }
 
 
+extension NSImage {
+    func convertToGrayScale() -> NSImage? {
+        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return nil
+        }
+
+        let ciImage = CIImage(cgImage: cgImage)
+        let filter = CIFilter(name: "CIColorControls")!
+        filter.setDefaults()
+        filter.setValue(ciImage, forKey: "inputImage")
+        filter.setValue(0.0, forKey: "inputSaturation")
+
+        guard let outputImage = filter.outputImage else {
+            return nil
+        }
+
+        let rep = NSCIImageRep(ciImage: outputImage)
+        let nsImage = NSImage(size: self.size)
+        nsImage.addRepresentation(rep)
+
+        return nsImage
+    }
+}
