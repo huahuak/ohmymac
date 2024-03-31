@@ -19,7 +19,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         setupCrashHandler()
 //        startWindowAction()
         startShortcut()
-        startRecentWindowManger()
+//        startRecentWindowManger()
+        startWindowMenuManager()
         NSApp.setActivationPolicy(.accessory)
         NSApp.activate(ignoringOtherApps: true)
     }
