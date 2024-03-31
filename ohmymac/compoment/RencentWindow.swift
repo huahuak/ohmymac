@@ -30,19 +30,19 @@ class RecentWindowManager {
         let notificationCenter = NSWorkspace.shared.notificationCenter
         let activeOB = notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: nil) { [self] notification in
-                addWSA(notification: notification)
+                addWindowSwitchAction(notification: notification)
         }
         let launchOB = notificationCenter.addObserver(
             forName: NSWorkspace.willLaunchApplicationNotification, object: nil, queue: nil) { [self] notification in
                 Thread.sleep(forTimeInterval: 1)
-                addWSA(notification: notification)
+                addWindowSwitchAction(notification: notification)
         }
         unhideOB = notificationCenter.addObserver(
             forName: NSWorkspace.didUnhideApplicationNotification, object: nil, queue: nil) { [self] notification in
-                addWSA(notification: notification)
+                addWindowSwitchAction(notification: notification)
         }
         notificationCenter.addObserver(self, selector:
-                                        #selector(removeWSA(notification:)),
+                                        #selector(rmWindowSwitchAction(notification:)),
                                        name: NSWorkspace.didHideApplicationNotification, 
                                        object: nil)
         NSWorkspace.shared.runningApplications.forEach({ app in
@@ -64,7 +64,7 @@ class RecentWindowManager {
         }
     }
     
-    @objc func addWSA(notification: Notification) {
+    @objc func addWindowSwitchAction(notification: Notification) {
         guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
             return
         }
@@ -85,7 +85,7 @@ class RecentWindowManager {
         append(activatedApp: activatedApp, frontMostWindow: frontMostWindow)
     }
     
-    @objc func removeWSA(notification: Notification) {
+    @objc func rmWindowSwitchAction(notification: Notification) {
         guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
             return
         }
@@ -94,7 +94,7 @@ class RecentWindowManager {
     
     func internalHide(show: WindowSwitchAction) {
         if iHide.count > 0 {
-            qlMessage(msg: "BUG: iHide locked")
+            notify(msg: "BUG: iHide locked")
             return
         }
         let cond = { (wsa: WindowSwitchAction) in
@@ -119,7 +119,7 @@ class RecentWindowManager {
                 self.unhideOB = NSWorkspace.shared.notificationCenter
                     .addObserver(
                         forName: NSWorkspace.didUnhideApplicationNotification,
-                        object: nil, queue: nil, using: self.addWSA)
+                        object: nil, queue: nil, using: self.addWindowSwitchAction)
             }
         }
         disableUnhideNotification {
@@ -199,28 +199,20 @@ class WindowSwitchAction: Equatable {
         menu.clean(btn) // BUG
     }
     
-    @objc func handleThreeFingerSwipe(_ gestureRecognizer: NSGestureRecognizer) {
-            if gestureRecognizer.state == .ended {
-                print("Three-finger swipe detected!")
-            }
-        }
-    
     @objc func switchWindow(_ sender: NSButton) {
-        let sw = {
+        let activateWindow = {
             let wsa = sender.target as! WindowSwitchAction
-            wsa.app.activate()
             let windowElement = wsa.winEle
             AXUIElementSetAttributeValue(windowElement, kAXFocusedAttribute as CFString, kCFBooleanTrue)
             AXUIElementSetAttributeValue(windowElement, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
+            wsa.app.activate()
         }
         let hideOtherOnlyOnce = { [rwm] in
             main.async { rwm?.internalHide(show: self) }
         }
         if let event = NSApp.currentEvent {
-            sw()
-            if event.modifierFlags.contains(.option) {
-                hideOtherOnlyOnce()
-            }
+            activateWindow()
+            if event.modifierFlags.contains(.option) { hideOtherOnlyOnce() }
         }
 
         return
@@ -264,21 +256,22 @@ class WindowSwitchShortcut {
                 if let eventTap = wss.eventTap {
                     CGEvent.tapEnable(tap: eventTap, enable: true)
                 }
+                return nil
             }
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             if !wss.doing && keyCode == 48 && event.flags.contains(.maskCommand) { // cmd + tab
                 wss.doing = true
-                main.async { wss.start() }
+                wss.start()
                 return nil
             }
             if wss.doing && keyCode == 48 && event.flags.contains(.maskCommand) {
                 wss.cnt += 1
-                main.async { wss.next(wss.cnt) }
+                wss.next(wss.cnt)
                 return nil
             }
             if wss.doing && !event.flags.contains(.maskCommand) {
                 wss.doing = false
-                main.async { wss.end(wss.cnt) }
+                wss.end(wss.cnt)
                 wss.cnt = 1
                 return nil
             }
@@ -296,7 +289,6 @@ class WindowSwitchShortcut {
             print("failed to create event tap")
             exit(1)
         }
-        
         wss.eventTap = eventTap
         let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
