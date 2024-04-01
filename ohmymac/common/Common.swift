@@ -15,9 +15,15 @@ let global = DispatchQueue.global()
 
 var deInitFunc = [() -> ()]()
 
-class ErrCode {
+class ErrCode: Error {
     static let NoPermission: Int32 = -200
     static let Err: Int32 = -1
+    
+    let msg: String
+    
+    init(msg: String) {
+        self.msg = msg
+    }
 }
 
 class Lock {
@@ -70,26 +76,3 @@ func notify(msg: String) {
 
 }
 
-extension NSImage {
-    func convertToGrayScale() -> NSImage? {
-        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            return nil
-        }
-
-        let ciImage = CIImage(cgImage: cgImage)
-        let filter = CIFilter(name: "CIColorControls")!
-        filter.setDefaults()
-        filter.setValue(ciImage, forKey: "inputImage")
-        filter.setValue(0.0, forKey: "inputSaturation")
-
-        guard let outputImage = filter.outputImage else {
-            return nil
-        }
-
-        let rep = NSCIImageRep(ciImage: outputImage)
-        let nsImage = NSImage(size: self.size)
-        nsImage.addRepresentation(rep)
-
-        return nsImage
-    }
-}

@@ -20,6 +20,7 @@ class Menu {
     }()
     let busyBtnLock = Lock()
     var viewRecordsStack: [NSView] = []
+    let maxLimit = 3
     
     
     init() {
@@ -56,13 +57,13 @@ class Menu {
     
     @objc(mouseExited:) func mouseExited(with event: NSEvent) {
         if !trackAreaLock.unlock() { return }
-        showOnly3()
+        showOnlyLimit()
     }
     
     func show(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v })
         viewRecordsStack.removeAll(where: { target in target == v })
-        while view.subviews.count > 2 {
+        while view.subviews.count > maxLimit - 1 {
             viewRecordsStack.append({
                 let first = view.arrangedSubviews.first!
                 view.removeArrangedSubview(first)
@@ -77,7 +78,7 @@ class Menu {
     func clean(_ v: NSView) {
         view.subviews.removeAll(where: { target in target == v})
         viewRecordsStack.removeAll(where: { target in target == v})
-        while view.subviews.count < 3 && viewRecordsStack.count > 0 {
+        while view.subviews.count < maxLimit && viewRecordsStack.count > 0 {
             view.insertArrangedSubview(viewRecordsStack.removeLast(), at: 0)
         }
         update()
@@ -106,8 +107,8 @@ class Menu {
         update()
     }
     
-    func showOnly3() {
-        while view.subviews.count > 3 {
+    func showOnlyLimit() {
+        while view.subviews.count > maxLimit {
             viewRecordsStack.append({
                 let first = view.arrangedSubviews.first!
                 view.removeArrangedSubview(first)

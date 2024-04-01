@@ -9,6 +9,10 @@ import Cocoa
 import Atomics
 import HotKey
 
+import Foundation
+import Carbon
+
+
 // COMMENT:
 // Shorcut compoment is used to listen shortcut keydown, then call some function and ui to response.
 

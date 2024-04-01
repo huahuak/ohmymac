@@ -41,9 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         UNUserNotificationCenter.current().requestAuthorization(options: [.badge]) { granted, error in
             if granted {
-                print("Notification authorization granted")
+                debugPrint("Notification authorization granted")
             } else {
-                print("Notification authorization denied")
+                debugPrint("Notification authorization denied")
             }
         }
     }

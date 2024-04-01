@@ -109,7 +109,6 @@ class WindowAction {
         // focused window
         var res = AXUIElementCopyAttributeValue(applicationElement, NSAccessibility.Attribute.focusedWindow.rawValue as CFString, &windowElementBuf)
         guard res == .success else {
-//            debugPrint("getSingleWindowElement failed in focused window")
             return nil
         }
         if windowElementBuf != nil {
@@ -119,7 +118,6 @@ class WindowAction {
         // main window
         res = AXUIElementCopyAttributeValue(applicationElement, NSAccessibility.Attribute.mainWindow.rawValue as CFString, &windowElementBuf)
         guard res == .success else {
-//            debugPrint("getSingleWindowElement failed in main window")
             return nil
         }
         if windowElementBuf != nil {
