@@ -14,15 +14,10 @@ fileprivate var windowMenuManager: WindowMenuManager? = nil
 fileprivate var keepingWindow: WindowManager!  = nil
 fileprivate var openingWindow: WindowManager!  = nil
 
-func startWindowMenuManager() {
-    windowMenuManager = WindowMenuManager()
+func startWindowMenuManager() { // IMPORTANT: don't change init order!!!
     openingWindow = WindowManager()
     keepingWindow = WindowManager()
-    add(HotKey(key: .p, modifiers: [.option])) {
-        if let window = getWindowFromFrontMostApp() {
-            markKeepWindow(window: window)
-        }
-    } // add shortcut
+    windowMenuManager = WindowMenuManager()
 }
 
 
@@ -30,7 +25,7 @@ func startWindowMenuManager() {
 // window function
 // ----------------------------------- //
 fileprivate func getAXWindowFromAXApp(app: AXUIElement) -> AXUIElement? {
-    if let axWindow = AXWindow.getFocusedWindow(app: app) { return axWindow }
+//    if let axWindow = AXWindow.getFocusedWindow(app: app) { return axWindow }
     if let axWindow = AXWindow.getMainWindow(app: app) { return axWindow }
     return nil
 }
@@ -42,6 +37,12 @@ fileprivate func getWindowFromFrontMostApp() -> Window? {
     }
     return nil
 }
+
+let pinWindowHandler = {
+    if let window = getWindowFromFrontMostApp() {
+        markKeepWindow(window: window)
+    }
+} // for shortcut
 
 // ------------------------------------ //
 // remove 
@@ -59,8 +60,8 @@ fileprivate var check = { checkHandler.forEach({ $0() }) }
 // ----------------------------------- //
 fileprivate var appendWindow = { (window: Window) in
     if keepingWindow.windows.contains(where: {$0 == window}) {
-        openingWindow.remove(window)
         keepingWindow.append(window)
+        window.pinIcon()
         return
     }
     openingWindow.append(window)
@@ -83,15 +84,80 @@ fileprivate var allWindows = {
     return windows
 }
 
+typealias notificationHandlerFunc = (Notification) -> Void
+
+class handlerFuncBuilder {
+    private var f: notificationHandlerFunc = { _ in }
+    
+    func append(name: NSNotification.Name, handler: @escaping notificationHandlerFunc) -> handlerFuncBuilder {
+        let origin = f
+        f = {
+            origin($0)
+            if $0.name == name {
+                handler($0)
+            }
+        }
+        return self
+    }
+    
+    func build() -> notificationHandlerFunc { return f }
+    
+    func commingWindow(handler: @escaping notificationHandlerFunc)-> handlerFuncBuilder {
+        didLaunchApplicationNotification(handler: handler)
+            .didActivateApplicationNotification(handler: handler)
+            .didUnhideApplicationNotification(handler: handler)
+    }
+    
+    func didLaunchApplicationNotification(handler: @escaping notificationHandlerFunc) -> handlerFuncBuilder {
+        append(name: NSWorkspace.didLaunchApplicationNotification, handler: handler)
+    }
+    
+    func didActivateApplicationNotification(handler: @escaping notificationHandlerFunc) -> handlerFuncBuilder {
+        append(name: NSWorkspace.didActivateApplicationNotification, handler: handler)
+    }
+    
+    func didHideApplicationNotification(handler: @escaping notificationHandlerFunc) -> handlerFuncBuilder {
+        append(name: NSWorkspace.didHideApplicationNotification, handler: handler)
+    }
+    
+    func didUnhideApplicationNotification(handler: @escaping notificationHandlerFunc) -> handlerFuncBuilder {
+        append(name: NSWorkspace.didUnhideApplicationNotification, handler: handler)
+    }
+    
+    func activeSpaceDidChangeNotification(handler: @escaping notificationHandlerFunc) -> handlerFuncBuilder {
+        append(name: NSWorkspace.activeSpaceDidChangeNotification, handler: handler)
+    }
+}
+
 fileprivate class WindowMenuManager {
     let wss: WindowSwitchShortcut = {
         var wss = WindowSwitchShortcut()
         WindowSwitchShortcut.startCGEvent(wss: &wss)
         return wss
     }()
+    
+    // window event handler
+    let openings = WindowManager()
+    let pins = WindowManager()
+    var actor: [notificationHandlerFunc] = []
+    
     var shift = false
     
+    static func handlerBuilder(origin: notificationHandlerFunc) {
+        
+    }
+    
     init() {
+        // init handler
+        let openingHandler = handlerFuncBuilder()
+            .commingWindow {
+                WindowMenuManager.getWindowFromNotice($0) {
+                    check()
+                    self.openings.append($0)
+                    $0.minimizeOtherWindow()
+                }
+            }
+            .build()
         // init status
         NSWorkspace.shared.runningApplications.forEach({ app in
             if app.isHidden { return }
@@ -99,7 +165,7 @@ fileprivate class WindowMenuManager {
                 let axApp = AXUIElementCreateApplication(app.processIdentifier)
                 if let axWindow = getAXWindowFromAXApp(app: axApp) {
                     let window = Window(app: app, axWindow: axWindow)
-                    main.async { openingWindow.append(window) }
+                    main.async { appendWindow(window) }
                 }
             }
             global.async { appendWindowFunc() }
@@ -108,28 +174,29 @@ fileprivate class WindowMenuManager {
         let addEvent = { (event: @escaping @Sendable (Notification) -> Void, notice: Notification.Name...) in
             notice.forEach({
                 let observer = NSWorkspace.shared.notificationCenter
-                    .addObserver(forName: $0, object: nil, queue: nil, using: event)
+                    .addObserver(forName: $0, object: nil, queue: nil) { notice in
+                        main.async { event(notice) }
+                    }
                 deInitFunc.append({
                     NSWorkspace.shared.notificationCenter.removeObserver(observer)
                 })
             })
         }
         let comingWindowHandler: @Sendable (Notification) -> Void = { notice in
-            self.getWindowFromNotice(notice) { window in
+            WindowMenuManager.getWindowFromNotice(notice) { window in
+                check()
                 if self.shift { // keep window singal
-                    check()
                     markKeepWindow(window: window)
                     openingWindow.currentSpaceWindow().forEach(markKeepWindow)
                     return
                 }
-                check()
                 appendWindow(window)
-                main.async { window.minimizeOtherWindow() }
+                window.minimizeOtherWindow()
 
             }
         } // comingWindowHandler
         let removeWindowHandler: @Sendable (Notification) -> Void = { notice in
-            self.getWindowFromNotice(notice) {
+            WindowMenuManager.getWindowFromNotice(notice) {
                 removeWindow($0)
             }
         } // removeWindowHandler
@@ -165,24 +232,22 @@ fileprivate class WindowMenuManager {
         }
     }
     
-    func getWindowFromNotice(_ notification: Notification,
+    static func getWindowFromNotice(_ notification: Notification,
                              handler: @escaping (Window) -> Void) {
-        global.async {
-            guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
-                return
-            }
-            if activatedApp.localizedName == "ohmymac" { return }
-            let axApp = AXUIElementCreateApplication(activatedApp.processIdentifier)
-            var axWindow = getAXWindowFromAXApp(app: axApp)
-            if axWindow == nil {
-                Thread.sleep(forTimeInterval: 0.2)
-                axWindow = getAXWindowFromAXApp(app: axApp)
-            }
-            guard let exist = axWindow else { return }
-            main.async {
-                handler(Window(app: activatedApp, axWindow: exist))
-            }
+        guard let activatedApp = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
+            return
         }
+        if activatedApp.localizedName == "ohmymac" { return }
+        if activatedApp.localizedName == "Finder" { return }
+        // TOOD Finder bug with GetID
+        let axApp = AXUIElementCreateApplication(activatedApp.processIdentifier)
+        var axWindow = getAXWindowFromAXApp(app: axApp)
+        if axWindow == nil {
+            Thread.sleep(forTimeInterval: 0.2)
+            axWindow = getAXWindowFromAXApp(app: axApp)
+        }
+        guard let exist = axWindow else { return }
+        handler(Window(app: activatedApp, axWindow: exist))
     }
 }
 
@@ -202,9 +267,9 @@ fileprivate class WindowManager {
     }
     
     func remove(_ window: Window) {
-        windows.filter({ $0 == window }).forEach({
-            debugPrint("\($0.app.localizedName ?? "unkown app") ❌")
-            menu.clean($0.btn)
+        windows.filter({ $0 == window }).forEach({ window in
+            debugPrint("\(window.app.localizedName ?? "unkown app") ❌")
+            menu.clean(window.btn)
         })
         windows.removeAll(where: { $0 == window })
     }
@@ -238,7 +303,7 @@ fileprivate class Window: Equatable {
         let btn = createMenuButton(img ?? randomIcon())
         btn.target = self
         btn.action = #selector(switchWindow(_:))
-        btn.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        btn.sendAction(on: [.leftMouseUp])
         debugPrint(app.localizedName! + " ✅")
         return btn
     }()
@@ -258,8 +323,8 @@ fileprivate class Window: Equatable {
     @objc func switchWindow(_ sender: NSButton) {
         let activateWindow = {
             let window = sender.target as! Window
-            AXUIElementSetAttributeValue(window.axWindow, kAXFocusedAttribute as CFString, kCFBooleanTrue)
-            AXUIElementSetAttributeValue(window.axWindow, kAXFrontmostAttribute as CFString, kCFBooleanTrue)
+//            AXUIElementSetAttributeValue(window.axWindow, kAXFocusedAttribute as CFString, kCFBooleanTrue)
+//            AXUIElementSetAttributeValue(window.axWindow, kAXMainWindowAttribute as CFString, kCFBooleanTrue)
             if !window.app.activate() {
                 print("activate failed.")
             }
@@ -286,7 +351,7 @@ fileprivate class Window: Equatable {
         if !AXWindow.minimize(window: self.axWindow) {
             notify(msg: "minimize failed! \(String(describing: self.app.localizedName))")
         }
-        main.async { Thread.sleep(forTimeInterval: 0.1); check() } // TODO bug to fix
+        removeWindow(self)
     }
     
     func minimizeOtherWindow() {
@@ -296,29 +361,29 @@ fileprivate class Window: Equatable {
                 if !AXWindow.minimize(window: window.axWindow) {
                     notify(msg: "minimize failed! \(String(describing: window.app.localizedName))")
                 }
+                removeWindow(window)
             })
-        main.async { Thread.sleep(forTimeInterval: 0.1); check() }
     }
     
     func updateSpace() {
-        let spaceID = AXWindow.getWindowSpaceID(window: axWindow)
-        if self.spaceID == spaceID { return }
+        let currentSpaceID = AXWindow.getWindowSpaceID(window: axWindow)
+        if self.spaceID == currentSpaceID { return }
         
-        let spaceOrder = AXWindow.getWindowSpaceOrder(window: axWindow)
+        let currentSpaceOrder = AXWindow.getWindowSpaceOrder(window: axWindow)
         
-        if self.spaceOrder == nil && spaceOrder != nil {
+        if self.spaceOrder == nil && currentSpaceOrder != nil {
             markKeepWindow(window: self)
         } // window exit fullscreen model
         
-        if self.spaceOrder != nil && spaceOrder == nil  {
+        if self.spaceOrder != nil && currentSpaceOrder == nil  {
             keepingWindow.remove(self)
             appendWindow(self)
             icon()
         } // window enter fullscreen model
         
         // update status
-        self.spaceID = spaceID
-        self.spaceOrder = spaceOrder
+        self.spaceID = currentSpaceID
+        self.spaceOrder = currentSpaceOrder
         
     }
     
@@ -329,13 +394,13 @@ fileprivate class Window: Equatable {
     }
     
     func icon() {
-        main.async { self.btn.image = self.baseIcon() }
+        self.btn.image = self.baseIcon()
     }
     
     func pinIcon() {
         let number = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)!
         number.size = NSSize(width: 9, height: 9)
-        main.async { self.btn.image = iconAddSubscript(img: self.baseIcon(), sub: number) }
+        self.btn.image = iconAddSubscript(img: self.baseIcon(), sub: number)
     }
     
     static func == (lhs: Window, rhs: Window) -> Bool {
@@ -362,7 +427,6 @@ class WindowSwitchShortcut {
         get(idx).highlight(true)
     }
     let end: (_ idx: Int) -> Void =  { idx in
-        print("end")
         get(idx - 1).highlight(false)
         get(idx).performClick(get(idx))
     }
@@ -371,9 +435,7 @@ class WindowSwitchShortcut {
         func myCGEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
             let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(refcon!).takeUnretainedValue()
             if type == .tapDisabledByTimeout {
-                main.async {
-                    notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
-                }
+                notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
                 if let eventTap = wss.eventTap {
                     CGEvent.tapEnable(tap: eventTap, enable: true)
                 }

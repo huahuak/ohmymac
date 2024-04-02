@@ -42,12 +42,14 @@ fileprivate func initShortcut() {
     // googleSearch
     add(HotKey(key: .g, modifiers: [.option, .command]), googleSearch)
     
-
+    Hotkey().doubleTrigger(modifiers: .shift) { // pin window
+       pinWindowHandler()
+    }
 }
 
 // MARK: - internal function
 func add(_ hotkey: HotKey, _ handler: @escaping Fn) {
-    hotkey.keyDownHandler = handler
+    hotkey.keyDownHandler = { main.async { handler() } } 
     hotkeys.append(hotkey)
 }
 

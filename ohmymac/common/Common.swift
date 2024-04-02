@@ -8,6 +8,7 @@
 import Cocoa
 import UserNotifications
 
+
 typealias Fn = () -> Void
 
 let main = DispatchQueue.main
@@ -73,6 +74,6 @@ func notify(msg: String) {
             print("Notification request added successfully")
         }
     }
-
 }
+
 

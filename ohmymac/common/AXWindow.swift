@@ -32,7 +32,7 @@ class AXWindow {
                 return spaceIDs.first
             }
         }
-        notify(msg: "getWindowSpaceID failed!")
+        debug(msg: "getWindowSpaceID() failed!")
         return nil
     }
     
@@ -41,7 +41,7 @@ class AXWindow {
         if _AXUIElementGetWindow(window, &wid) == .success {
             return wid
         }
-        notify(msg: "getID failed!")
+        debug(msg: "getID failed!")
         return nil
     }
     
@@ -49,7 +49,7 @@ class AXWindow {
         if let space = spaceIdentifier.getSpaceInfo().activeSpaces.first {
             return space.number
         }
-        notify(msg: "get space order failed!")
+        notify(msg: "activatedSpaceOrder() failed!")
         return -1
     }
     
@@ -57,7 +57,7 @@ class AXWindow {
         if let space = spaceIdentifier.getSpaceInfo().activeSpaces.first {
             return space.id64
         }
-        notify(msg: "get space id failed!")
+        notify(msg: "activatedSpaceID() failed!")
         return -1
     }
     
