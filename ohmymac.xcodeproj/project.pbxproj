@@ -24,6 +24,7 @@
 		475247A82B96DDF70084460B /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479E2B96DDF70084460B /* WebView.swift */; };
 		475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A12B96DDF70084460B /* GoogleSearch.swift */; };
 		475247AC2B96DDF70084460B /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A32B96DDF70084460B /* Translate.swift */; };
+		478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C91682BBC3DA60031E95C /* Hotkey.swift */; };
 		47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A8BCD52BBB23BE00DCDA3C /* Image.swift */; };
 		47C9DEAC2BBAB1AF002189C6 /* SpaceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAA2BBAB1AF002189C6 /* SpaceIdentifier.swift */; };
 		47C9DEAD2BBAB1AF002189C6 /* SpaceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAB2BBAB1AF002189C6 /* SpaceInfo.swift */; };
@@ -49,6 +50,7 @@
 		4752479E2B96DDF70084460B /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		475247A12B96DDF70084460B /* GoogleSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleSearch.swift; sourceTree = "<group>"; };
 		475247A32B96DDF70084460B /* Translate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translate.swift; sourceTree = "<group>"; };
+		478C91682BBC3DA60031E95C /* Hotkey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hotkey.swift; sourceTree = "<group>"; };
 		47A8BCD52BBB23BE00DCDA3C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		47C9DEAA2BBAB1AF002189C6 /* SpaceIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpaceIdentifier.swift; sourceTree = "<group>"; };
 		47C9DEAB2BBAB1AF002189C6 /* SpaceInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpaceInfo.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				475247882B96DC860084460B /* Common.swift */,
 				471F0C692BB976AC00E00259 /* AXWindow.swift */,
 				47A8BCD52BBB23BE00DCDA3C /* Image.swift */,
+				478C91682BBC3DA60031E95C /* Hotkey.swift */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -269,6 +272,7 @@
 				475247A72B96DDF70084460B /* FocusManager.swift in Sources */,
 				475247AC2B96DDF70084460B /* Translate.swift in Sources */,
 				475247A52B96DDF70084460B /* QuickLook.swift in Sources */,
+				478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */,
 				4752478F2B96DC860084460B /* Shortcut.swift in Sources */,
 				47C9DEAC2BBAB1AF002189C6 /* SpaceIdentifier.swift in Sources */,
 				47C9DEAD2BBAB1AF002189C6 /* SpaceInfo.swift in Sources */,
@@ -407,7 +411,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -440,7 +444,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 24;
+				CURRENT_PROJECT_VERSION = 25;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";

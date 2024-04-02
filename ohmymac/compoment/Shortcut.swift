@@ -42,12 +42,15 @@ fileprivate func initShortcut() {
     // googleSearch
     add(HotKey(key: .g, modifiers: [.option, .command]), googleSearch)
     
-    // MARK: - internal function
-    func add(_ hotkey: HotKey, _ handler: @escaping Fn) {
-        hotkey.keyDownHandler = handler
-        hotkeys.append(hotkey)
-    }
+
 }
+
+// MARK: - internal function
+func add(_ hotkey: HotKey, _ handler: @escaping Fn) {
+    hotkey.keyDownHandler = handler
+    hotkeys.append(hotkey)
+}
+
 
 func percentExec(_ width: Double, _ height: Double = 1) -> Fn {
     return {

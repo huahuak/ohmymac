@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import Cocoa
+import HotKey
 
 fileprivate var windowMenuManager: WindowMenuManager? = nil
 fileprivate var keepingWindow: WindowManager!  = nil
@@ -17,11 +18,28 @@ func startWindowMenuManager() {
     windowMenuManager = WindowMenuManager()
     openingWindow = WindowManager()
     keepingWindow = WindowManager()
+    add(HotKey(key: .p, modifiers: [.option])) {
+        if let window = getWindowFromFrontMostApp() {
+            markKeepWindow(window: window)
+        }
+    } // add shortcut
 }
 
+
+// ------------------------------------ //
+// window function
+// ----------------------------------- //
 fileprivate func getAXWindowFromAXApp(app: AXUIElement) -> AXUIElement? {
     if let axWindow = AXWindow.getFocusedWindow(app: app) { return axWindow }
     if let axWindow = AXWindow.getMainWindow(app: app) { return axWindow }
+    return nil
+}
+
+fileprivate func getWindowFromFrontMostApp() -> Window? {
+    if let app = NSWorkspace.shared.frontmostApplication,
+       let axWindow = getAXWindowFromAXApp(app: AXUIElementCreateApplication(app.processIdentifier)) {
+        return Window(app: app, axWindow: axWindow)
+    }
     return nil
 }
 
@@ -109,24 +127,17 @@ fileprivate class WindowMenuManager {
                 main.async { window.minimizeOtherWindow() }
 
             }
-        }
+        } // comingWindowHandler
         let removeWindowHandler: @Sendable (Notification) -> Void = { notice in
             self.getWindowFromNotice(notice) {
                 removeWindow($0)
             }
-        }
-        let updateSpaceHandler: @Sendable (Notification) -> Void = { notice in
-            if AXWindow.activatedSpaceOrder() == nil { // when fullscreen detect
-                // TODO: need to imporve
-                // using to remove window from keepwindow, and refresh window status.
-                keepingWindow.currentSpaceWindow().forEach({
-                    print("\($0.app.localizedName!)")
-                    removeWindow($0)
-                    appendWindow($0)
-                    $0.icon()
-                })
-            }
-        }
+        } // removeWindowHandler
+        let updateSpaceHandler: @Sendable (Notification) -> Void = { _ in
+            WindowManager.currentSpaceWindow(windows: allWindows()).forEach({
+                $0.updateSpace()
+            })
+        } // updateSpaceHandler
         addEvent(
             comingWindowHandler,
             NSWorkspace.didLaunchApplicationNotification,
@@ -185,13 +196,7 @@ fileprivate class WindowManager {
     }
     
     func append(_ window: Window) {
-        if let exist = windows.first(where: { $0 == window }) {
-            windows.removeAll(where: { $0 == exist })
-            windows.append(exist)
-            exist.axWindow = window.axWindow
-            menu.show(exist.btn)
-            return
-        }
+        remove(window)
         windows.append(window)
         menu.show(window.btn)
     }
@@ -212,11 +217,15 @@ fileprivate class WindowManager {
         deadWindow.forEach(remove)
     }
     
-    func currentSpaceWindow() -> [Window] {
+    static func currentSpaceWindow(windows: [Window]) -> [Window] {
         windows.filter({
-            let updatedSpaceID = AXWindow.getWindowSpaceID(window: $0.axWindow)
-            return AXWindow.activatedSpaceID() == updatedSpaceID
+            AXWindow.activatedSpaceID() == 
+            AXWindow.getWindowSpaceID(window: $0.axWindow)
         })
+    }
+    
+    func currentSpaceWindow() -> [Window] {
+        return WindowManager.currentSpaceWindow(windows: windows)
     }
 }
 
@@ -233,10 +242,17 @@ fileprivate class Window: Equatable {
         debugPrint(app.localizedName! + " ✅")
         return btn
     }()
+    // window status
+    var spaceID: Int? = nil
+    var spaceOrder: Int? = nil
+    var WindowID: CGWindowID? = nil
     
     init(app: NSRunningApplication, axWindow: AXUIElement) {
         self.app = app
         self.axWindow = axWindow
+        self.spaceID = AXWindow.getWindowSpaceID(window: axWindow)
+        self.spaceOrder = AXWindow.getWindowSpaceOrder(window: axWindow)
+        self.WindowID = AXWindow.getID(window: axWindow)
     }
     
     @objc func switchWindow(_ sender: NSButton) {
@@ -282,23 +298,44 @@ fileprivate class Window: Equatable {
                 }
             })
         main.async { Thread.sleep(forTimeInterval: 0.1); check() }
+    }
+    
+    func updateSpace() {
+        let spaceID = AXWindow.getWindowSpaceID(window: axWindow)
+        if self.spaceID == spaceID { return }
+        
+        let spaceOrder = AXWindow.getWindowSpaceOrder(window: axWindow)
+        
+        if self.spaceOrder == nil && spaceOrder != nil {
+            markKeepWindow(window: self)
+        } // window exit fullscreen model
+        
+        if self.spaceOrder != nil && spaceOrder == nil  {
+            keepingWindow.remove(self)
+            appendWindow(self)
+            icon()
+        } // window enter fullscreen model
+        
+        // update status
+        self.spaceID = spaceID
+        self.spaceOrder = spaceOrder
         
     }
     
-    func createIcon() -> NSImage {
+    private func baseIcon() -> NSImage {
         let img = app.icon
         img?.size = NSSize(width: 22, height: 22)
         return img ?? randomIcon()
     }
     
     func icon() {
-        main.async { self.btn.image = self.createIcon() }
+        main.async { self.btn.image = self.baseIcon() }
     }
     
     func pinIcon() {
         let number = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)!
         number.size = NSSize(width: 9, height: 9)
-        main.async { self.btn.image = iconAddSubscript(img: self.createIcon(), sub: number) }
+        main.async { self.btn.image = iconAddSubscript(img: self.baseIcon(), sub: number) }
     }
     
     static func == (lhs: Window, rhs: Window) -> Bool {

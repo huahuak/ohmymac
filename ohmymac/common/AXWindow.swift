@@ -109,15 +109,6 @@ class AXWindow {
         return nil
     }
     
-    static func getFrontMostWindow(app: AXUIElement) -> AXUIElement? {
-        var windowElementBuf: AnyObject?
-        let res = AXUIElementCopyAttributeValue(app, NSAccessibility.Attribute.frontmost.rawValue as CFString, &windowElementBuf)
-        if res == .success && windowElementBuf != nil {
-            return (windowElementBuf as! AXUIElement)
-        }
-        return nil
-    }
-    
     static func getAllWindows(app: AXUIElement) -> [AXUIElement]? {
         var windowElementBuf: AnyObject?
         if AXUIElementCopyAttributeValue(
