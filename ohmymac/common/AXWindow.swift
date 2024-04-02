@@ -32,7 +32,16 @@ class AXWindow {
                 return spaceIDs.first
             }
         }
-        notify(msg: "getWindowSpaceOrder failed!")
+        notify(msg: "getWindowSpaceID failed!")
+        return nil
+    }
+    
+    static func getID(window: AXUIElement) -> CGWindowID? {
+        var wid: CGWindowID = 0
+        if _AXUIElementGetWindow(window, &wid) == .success {
+            return wid
+        }
+        notify(msg: "getID failed!")
         return nil
     }
     
@@ -59,6 +68,10 @@ class AXWindow {
             return true
         }
         return false
+    }
+    
+    static func isFullScreent(window: AXUIElement) -> Bool {
+        return getWindowSpaceOrder(window: window) == nil
     }
     
     static func isMinimized(window: AXUIElement) -> Bool {
@@ -124,14 +137,7 @@ class AXWindow {
         return nil
     }    
     
-    static func getID(window: AXUIElement) -> String? {
-        var windowValue: AnyObject?
-        let res =  AXUIElementCopyAttributeValue(window, kAXWindowAttribute as CFString, &windowValue)
-        if res == .success && windowValue != nil {
-            return windowValue as? String
-        }
-        return nil
-    }
+    
 }
 
 // ------------------------------------ //
