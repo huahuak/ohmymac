@@ -14,51 +14,11 @@ typealias Fn = () -> Void
 let main = DispatchQueue.main
 let global = DispatchQueue.global()
 
-var deInitFunc = [() -> ()]()
+var deInitFunc: [Fn] = []
 
 class ErrCode: Error {
     static let NoPermission: Int32 = -200
     static let Err: Int32 = -1
-    
-    let msg: String
-    
-    init(msg: String) {
-        self.msg = msg
-    }
-}
-
-class Lock {
-    var locked = 0
-    let before: Fn?
-    let after: Fn?
-    
-    init(before: Fn? = nil, after: Fn? = nil) {
-        self.before = before
-        self.after = after
-    }
-    
-    func lock() -> Bool {
-        if locked >= 1 { return false }
-        locked = 1;
-        before?()
-        return true
-    }
-    
-    func unlock() -> Bool {
-        if locked == 0 || locked != 1 { return false }
-        locked = 0;
-        after?()
-        return true
-    }
-    
-    func p() {
-        locked += 1
-    }
-    
-    func v() {
-        if locked == 0 { return }
-        locked -= 1
-    }
 }
 
 func notify(msg: String) {
@@ -76,4 +36,21 @@ func notify(msg: String) {
     }
 }
 
+func getCurrentTimestampInMilliseconds() -> Int64 {
+    var timeval = timeval()
+    gettimeofday(&timeval, nil)
+    let milliseconds = Int64(timeval.tv_sec) * 1000 + Int64(timeval.tv_usec) / 1000
+    return milliseconds
+}
 
+func retry(f: () -> Bool, times: UInt8 = 3) {
+    var cnt = 0
+    let interval: useconds_t = 100 * 1000 // 100ms
+    while cnt < times {
+        if f() {
+            return
+        }
+        cnt += 1
+        usleep(interval)
+    }
+}

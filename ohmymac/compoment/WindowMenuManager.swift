@@ -28,10 +28,8 @@ fileprivate func getAXWindowFromAXApp(axApp: AXUIElement) -> AXUIElement? {
 }
 
 let pinWindowHandler = {
-    if let app = NSWorkspace.shared.frontmostApplication,
-       let axWindow = getAXWindowFromAXApp(axApp: AXUIElementCreateApplication(app.processIdentifier)) {
-        let window = Window(app: app, axWindow: axWindow)
-        windowMenuManager?.notifyWindowPinned(window.cond) // TODO bug to fix
+    if let app = NSWorkspace.shared.frontmostApplication {
+        windowMenuManager.notifyWindowPinned({ Window.cond(window: $0, app: app) })
     }
 } // for shortcut
 
@@ -77,16 +75,17 @@ fileprivate class WindowMenuManager {
             NSWorkspace.didUnhideApplicationNotification
         )
         addNSWorkSpaceObserver(
-            {
+            { [self] in
                 var found = false
-                self.extractCondFromNotice($0) { cond in
-                    if self.findWindow(cond) == nil { return }
+                extractCondFromNotice($0) { [self ]cond in
+                    if findWindow(cond) == nil { return }
                     found = true
-                    self.notifyWindowtFocused(cond)
+                    notifyWindowtFocused(cond)
                 }
                 if !found {
-                    self.createWindowFromNotice($0, handler: self.notifyWindowCreated)
+                    createWindowFromNotice($0, handler: self.notifyWindowCreated)
                 }
+                [openings, pins, fullscreen].forEach({ $0.check() })
             },
             NSWorkspace.didActivateApplicationNotification
         )
@@ -122,9 +121,9 @@ fileprivate class WindowMenuManager {
     }
     
     func notifyWindowRemoved(_ cond: WindowCond) {
-        openings.remove(cond)
-        pins.remove(cond)
-        fullscreen.remove(cond)
+        [openings, pins, fullscreen].forEach({
+            $0.remove(cond)
+        })
         [openings, pins, fullscreen].forEach({ $0.syncUI() })
     }
     
@@ -227,17 +226,7 @@ fileprivate class WindowMenuManager {
         if activatedApp.localizedName == "ohmymac" { return }
         if activatedApp.localizedName == "Finder" { return }
         // TOOD Finder bug with GetID
-        let axApp = AXUIElementCreateApplication(activatedApp.processIdentifier)
-        var axWindow = getAXWindowFromAXApp(axApp: axApp)
-        if axWindow == nil {
-            Thread.sleep(forTimeInterval: 0.2)
-            axWindow = getAXWindowFromAXApp(axApp: axApp)
-        }
-        guard axWindow != nil else { return }
-        let cond = { (window: Window) in
-            window.app == activatedApp
-        }
-        handler(cond)
+        handler({ Window.cond(window: $0, app: activatedApp) })
     }
 }
 
@@ -328,7 +317,7 @@ fileprivate class Window: Equatable {
             }
             let unregistry = Observer.addAX(notification: notification,
                                             pid: pid,
-                                            axWindow: AXUIElementCreateApplication(pid),
+                                            axApp: AXUIElementCreateApplication(pid),
                                             fn: escapeFn)
             window.deinitCallback.append(unregistry)
         } // end: registryCallback
@@ -338,8 +327,7 @@ fileprivate class Window: Equatable {
         }
         registryCallback(kAXWindowDeminiaturizedNotification) { [weak self] in
             guard let window = self else { return }
-            windowMenuManager.notifyWindowtFocused(window.cond)
-            
+            windowMenuManager.notifyWindowCreated(window)
         }
         registryCallback(kAXUIElementDestroyedNotification) { [weak self] in
             guard let window = self else { return }
@@ -348,7 +336,6 @@ fileprivate class Window: Equatable {
             }
             windowMenuManager.notifyWindowRemoved(window.cond)
         }
-        
         return btn
     }()
     // window status
@@ -437,6 +424,10 @@ fileprivate class Window: Equatable {
             return true
         }
         return false
+    }
+    
+    static func cond(window: Window, app: NSRunningApplication) -> Bool {
+        return window.app == app
     }
     
     func cond(window: Window) -> Bool {

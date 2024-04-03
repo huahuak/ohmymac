@@ -34,7 +34,7 @@ class Observer {
     
     static func addAX(notification: String,
                       pid: pid_t,
-                      axWindow: AXUIElement,
+                      axApp: AXUIElement,
                       fn: EscapeFn) -> Fn {
         var axObserver: AXObserver? = nil
         let fnPtr =  Unmanaged.passRetained(fn)
@@ -50,7 +50,7 @@ class Observer {
             warn("Observer.addAX(): create failed!"); return {}
         }
         if AXObserverAddNotification(axObserver!,
-                                     axWindow, notification as CFString,
+                                     axApp, notification as CFString,
                                      fnPtr.toOpaque()) != .success {
             warn("Observer.addAX(): add failed!"); return {}
         }
@@ -62,8 +62,9 @@ class Observer {
             CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(),
                                   AXObserverGetRunLoopSource(axObserver!),
                                   CFRunLoopMode.defaultMode)
-            if AXObserverRemoveNotification(axObserver!, axWindow, notification as CFString) != .success {
-                warn("Observer.addAX(): remove failed!")
+            let result = AXObserverRemoveNotification(axObserver!, axApp, notification as CFString)
+            if  result != .success {
+                warn("Observer.addAX(): remove failed! result is \(result.rawValue)")
             }
             axObserver = nil
             fnPtr.release()

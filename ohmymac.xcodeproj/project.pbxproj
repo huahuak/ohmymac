@@ -31,7 +31,7 @@
 		47C9DEAD2BBAB1AF002189C6 /* SpaceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAB2BBAB1AF002189C6 /* SpaceInfo.swift */; };
 		47C9DEAF2BBAB1E9002189C6 /* Space.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAE2BBAB1E9002189C6 /* Space.swift */; };
 		47C9DEBD2BBAB2FD002189C6 /* PFMoveApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEBC2BBAB2FD002189C6 /* PFMoveApplication.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		47D163152BBC5F8D004F27A7 /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D163142BBC5F8D004F27A7 /* Time.swift */; };
+		47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D14D5E2BBDBFF200198C1C /* Concurrent.swift */; };
 		47E3970B2BBC816800E22718 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E3970A2BBC816800E22718 /* Logger.swift */; };
 /* End PBXBuildFile section */
 
@@ -63,7 +63,7 @@
 		47C9DEB12BBAB266002189C6 /* ohmymac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ohmymac.entitlements; sourceTree = "<group>"; };
 		47C9DEBB2BBAB2FD002189C6 /* PFMoveApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PFMoveApplication.h; sourceTree = "<group>"; };
 		47C9DEBC2BBAB2FD002189C6 /* PFMoveApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PFMoveApplication.m; sourceTree = "<group>"; };
-		47D163142BBC5F8D004F27A7 /* Time.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
+		47D14D5E2BBDBFF200198C1C /* Concurrent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Concurrent.swift; sourceTree = "<group>"; };
 		47E3970A2BBC816800E22718 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -151,9 +151,9 @@
 				471F0C692BB976AC00E00259 /* AXWindow.swift */,
 				47A8BCD52BBB23BE00DCDA3C /* Image.swift */,
 				478C91682BBC3DA60031E95C /* Hotkey.swift */,
-				47D163142BBC5F8D004F27A7 /* Time.swift */,
 				47E3970A2BBC816800E22718 /* Logger.swift */,
 				47A2DF362BBD069200B7638F /* Observer.swift */,
+				47D14D5E2BBDBFF200198C1C /* Concurrent.swift */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -267,10 +267,10 @@
 				475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */,
 				47A2DF372BBD069200B7638F /* Observer.swift in Sources */,
 				475247922B96DC860084460B /* AppDelegate.swift in Sources */,
-				47D163152BBC5F8D004F27A7 /* Time.swift in Sources */,
 				471F0C682BB9505500E00259 /* WindowMenuManager.swift in Sources */,
 				47C9DEBD2BBAB2FD002189C6 /* PFMoveApplication.m in Sources */,
 				475247A82B96DDF70084460B /* WebView.swift in Sources */,
+				47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */,
 				475247A62B96DDF70084460B /* TmpFile.swift in Sources */,
 				4752478E2B96DC860084460B /* Common.swift in Sources */,
 				473715322BA21245003275F2 /* SelectText.swift in Sources */,
