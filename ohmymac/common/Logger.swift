@@ -9,7 +9,17 @@ import Foundation
 
 let DEBUG = true
 
-func debug(msg: String) {
+func debugNotify(msg: String) {
     if !DEBUG { return }
     notify(msg: msg)
+}
+
+func warn(_ msg: String) {
+    if !DEBUG { return }
+    debugPrint(msg)
+}
+
+func info(_ msg: String) {
+    if !DEBUG { return }
+    debugPrint(msg)
 }

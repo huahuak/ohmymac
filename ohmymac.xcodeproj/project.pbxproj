@@ -25,6 +25,7 @@
 		475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A12B96DDF70084460B /* GoogleSearch.swift */; };
 		475247AC2B96DDF70084460B /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A32B96DDF70084460B /* Translate.swift */; };
 		478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C91682BBC3DA60031E95C /* Hotkey.swift */; };
+		47A2DF372BBD069200B7638F /* Observer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2DF362BBD069200B7638F /* Observer.swift */; };
 		47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A8BCD52BBB23BE00DCDA3C /* Image.swift */; };
 		47C9DEAC2BBAB1AF002189C6 /* SpaceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAA2BBAB1AF002189C6 /* SpaceIdentifier.swift */; };
 		47C9DEAD2BBAB1AF002189C6 /* SpaceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAB2BBAB1AF002189C6 /* SpaceInfo.swift */; };
@@ -53,6 +54,7 @@
 		475247A12B96DDF70084460B /* GoogleSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleSearch.swift; sourceTree = "<group>"; };
 		475247A32B96DDF70084460B /* Translate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translate.swift; sourceTree = "<group>"; };
 		478C91682BBC3DA60031E95C /* Hotkey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hotkey.swift; sourceTree = "<group>"; };
+		47A2DF362BBD069200B7638F /* Observer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observer.swift; sourceTree = "<group>"; };
 		47A8BCD52BBB23BE00DCDA3C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		47C9DEAA2BBAB1AF002189C6 /* SpaceIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpaceIdentifier.swift; sourceTree = "<group>"; };
 		47C9DEAB2BBAB1AF002189C6 /* SpaceInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpaceInfo.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				478C91682BBC3DA60031E95C /* Hotkey.swift */,
 				47D163142BBC5F8D004F27A7 /* Time.swift */,
 				47E3970A2BBC816800E22718 /* Logger.swift */,
+				47A2DF362BBD069200B7638F /* Observer.swift */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -262,6 +265,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */,
+				47A2DF372BBD069200B7638F /* Observer.swift in Sources */,
 				475247922B96DC860084460B /* AppDelegate.swift in Sources */,
 				47D163152BBC5F8D004F27A7 /* Time.swift in Sources */,
 				471F0C682BB9505500E00259 /* WindowMenuManager.swift in Sources */,
@@ -419,7 +423,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 26.1;
+				CURRENT_PROJECT_VERSION = 27;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -431,7 +435,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -452,7 +456,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 26.1;
+				CURRENT_PROJECT_VERSION = 27;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -464,7 +468,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

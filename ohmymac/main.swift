@@ -7,8 +7,8 @@
 
 import AppKit
 
-let app = NSApplication.shared
+let ohmymacApp = NSApplication.shared
 let menu = Menu()
 let delegate = AppDelegate()
-app.delegate = delegate
-app.run()
+ohmymacApp.delegate = delegate
+ohmymacApp.run()

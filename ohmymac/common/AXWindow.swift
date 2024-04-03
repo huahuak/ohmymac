@@ -32,7 +32,7 @@ class AXWindow {
                 return spaceIDs.first
             }
         }
-        debug(msg: "getWindowSpaceID() failed!")
+        debugNotify(msg: "getWindowSpaceID() failed!")
         return nil
     }
     
@@ -41,7 +41,7 @@ class AXWindow {
         if _AXUIElementGetWindow(window, &wid) == .success {
             return wid
         }
-        debug(msg: "getID failed!")
+        debugNotify(msg: "getID failed!")
         return nil
     }
     
