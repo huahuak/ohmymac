@@ -12,10 +12,10 @@ import HotKey
 
 fileprivate typealias WindowCond = (Window) -> Bool
 
-fileprivate var windowMenuManager: WindowMenuManager! = nil
+fileprivate var windowManager: WindowManager! = nil
 
 func startWindowMenuManager() { // IMPORTANT: don't change init order!!!
-    windowMenuManager = WindowMenuManager()
+    windowManager = WindowManager()
 }
 
 // ------------------------------------ //
@@ -29,7 +29,7 @@ fileprivate func getAXWindowFromAXApp(axApp: AXUIElement) -> AXUIElement? {
 
 let pinWindowHandler = {
     if let app = NSWorkspace.shared.frontmostApplication {
-        windowMenuManager.notifyWindowPinned({ Window.cond(window: $0, app: app) })
+        windowManager.notifyWindowPinned({ Window.cond(window: $0, app: app) })
     }
 } // for shortcut
 
@@ -39,7 +39,7 @@ let pinWindowHandler = {
 fileprivate var checkHandler: [Fn] = []
 fileprivate var check = { checkHandler.forEach({ $0() }) }
 
-fileprivate class WindowMenuManager {
+fileprivate class WindowManager {
     let wss: WindowSwitchShortcut = {
         var wss = WindowSwitchShortcut()
         WindowSwitchShortcut.startCGEvent(wss: &wss)
@@ -47,9 +47,9 @@ fileprivate class WindowMenuManager {
     }()
     var shift = false
     // window event handler
-    let openings = WindowSet()
-    let pins = WindowSet()
-    let fullscreen = WindowSet()
+    let openings = WindowCollection()
+    let pins = WindowCollection()
+    let fullscreen = WindowCollection()
     
     init() {
         // ------------------------------------ //
@@ -230,7 +230,7 @@ fileprivate class WindowMenuManager {
     }
 }
 
-fileprivate class WindowSet {
+fileprivate class WindowCollection {
     var windows: [Window] = []
     var UIFunc: [Fn] = []
     
@@ -279,7 +279,7 @@ fileprivate class WindowSet {
     }
     
     func currentSpaceWindow() -> [Window] {
-        return  windows.filter(WindowSet.currentSpaceFilter)
+        return  windows.filter(WindowCollection.currentSpaceFilter)
     }
     
     func syncUI() {
@@ -323,18 +323,18 @@ fileprivate class Window: Equatable {
         } // end: registryCallback
         registryCallback(kAXWindowMiniaturizedNotification) { [weak self] in
             guard let window = self else { return }
-            windowMenuManager.notifyWindowRemoved(window.cond)
+            windowManager.notifyWindowRemoved(window.cond)
         }
         registryCallback(kAXWindowDeminiaturizedNotification) { [weak self] in
             guard let window = self else { return }
-            windowMenuManager.notifyWindowCreated(window)
+            windowManager.notifyWindowCreated(window)
         }
         registryCallback(kAXUIElementDestroyedNotification) { [weak self] in
             guard let window = self else { return }
             if window.isAlive() {
                 return
             }
-            windowMenuManager.notifyWindowRemoved(window.cond)
+            windowManager.notifyWindowRemoved(window.cond)
         }
         return btn
     }()
@@ -367,7 +367,7 @@ fileprivate class Window: Equatable {
         if let event = NSApp.currentEvent {
             if event.modifierFlags.contains(.option) && event.modifierFlags.contains(.command) {
                 activateWindow()
-                windowMenuManager.minimizeOtherWindowExcept(self.cond)
+                windowManager.minimizeOtherWindowExcept(self.cond)
                 return
             }
             if event.modifierFlags.contains(.option) {
@@ -375,7 +375,7 @@ fileprivate class Window: Equatable {
                 return
             }
             if event.modifierFlags.contains(.shift) {
-                windowMenuManager?.notifyWindowPinned(self.cond)
+                windowManager?.notifyWindowPinned(self.cond)
                 return
             }
             activateWindow()
@@ -389,9 +389,9 @@ fileprivate class Window: Equatable {
     }
     
     func pin() {
-        let number = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)!
-        number.size = NSSize(width: 9, height: 9)
-        self.btn.image = iconAddSubscript(img: self.baseIcon, sub: number)
+        let pin = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)!
+        pin.size = NSSize(width: 9, height: 9)
+        self.btn.image = iconAddSubscript(img: self.baseIcon, sub: pin)
     }
     
     func unpin() {
@@ -405,11 +405,11 @@ fileprivate class Window: Equatable {
         let currentSpaceOrder = AXWindow.getWindowSpaceOrder(window: axWindow)
         
         if self.spaceOrder == nil && currentSpaceOrder != nil {
-            windowMenuManager.notifyWindowExitFullscreen(self.cond)
+            windowManager.notifyWindowExitFullscreen(self.cond)
         } // window exit fullscreen model
         
         if self.spaceOrder != nil && currentSpaceOrder == nil  {
-            windowMenuManager.notifyWindowEnterFullscreen(self.cond)
+            windowManager.notifyWindowEnterFullscreen(self.cond)
         } // window enter fullscreen model
         
         // update status

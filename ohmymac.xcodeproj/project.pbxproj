@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		471F0C682BB9505500E00259 /* WindowMenuManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C672BB9505500E00259 /* WindowMenuManager.swift */; };
+		471F0C682BB9505500E00259 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C672BB9505500E00259 /* WindowManager.swift */; };
 		471F0C6A2BB976AC00E00259 /* AXWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C692BB976AC00E00259 /* AXWindow.swift */; };
 		473715322BA21245003275F2 /* SelectText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473715312BA21245003275F2 /* SelectText.swift */; };
 		4741D89E2B97083100743990 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D89D2B97083100743990 /* HotKey */; };
@@ -36,7 +36,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		471F0C672BB9505500E00259 /* WindowMenuManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowMenuManager.swift; sourceTree = "<group>"; };
+		471F0C672BB9505500E00259 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		471F0C692BB976AC00E00259 /* AXWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWindow.swift; sourceTree = "<group>"; };
 		473715312BA21245003275F2 /* SelectText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectText.swift; sourceTree = "<group>"; };
 		475247692B96DA030084460B /* ohmymac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ohmymac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -139,7 +139,7 @@
 			children = (
 				475247892B96DC860084460B /* Shortcut.swift */,
 				4752478B2B96DC860084460B /* WindowAction.swift */,
-				471F0C672BB9505500E00259 /* WindowMenuManager.swift */,
+				471F0C672BB9505500E00259 /* WindowManager.swift */,
 			);
 			path = compoment;
 			sourceTree = "<group>";
@@ -267,7 +267,7 @@
 				475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */,
 				47A2DF372BBD069200B7638F /* Observer.swift in Sources */,
 				475247922B96DC860084460B /* AppDelegate.swift in Sources */,
-				471F0C682BB9505500E00259 /* WindowMenuManager.swift in Sources */,
+				471F0C682BB9505500E00259 /* WindowManager.swift in Sources */,
 				47C9DEBD2BBAB2FD002189C6 /* PFMoveApplication.m in Sources */,
 				475247A82B96DDF70084460B /* WebView.swift in Sources */,
 				47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */,
