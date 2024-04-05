@@ -40,7 +40,7 @@ class WindowManager {
         // ----------------------------------- //
         let appendWindowFunc = { [self] (nsapp: NSRunningApplication, redo: Bool) in
             if nsapp.localizedName == "ohmymac" { return }
-//            if nsapp.localizedName == "Finder" { return }
+            if nsapp.localizedName == "Finder" { return }
             if applications.contains(where: { nsapp.processIdentifier == $0.nsApp.processIdentifier }) {
                 return
             }

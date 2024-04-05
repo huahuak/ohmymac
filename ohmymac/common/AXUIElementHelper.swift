@@ -24,6 +24,11 @@ extension AXUIElement {
     private func get<T>(attr: NSAccessibility.Attribute) -> T? {
         get<T>(str: attr.rawValue)
     }
+    
+    func subrole() -> String? {
+        get(attr: .subrole)
+    }
+    
     // ------------------------------------ //
     // for space
     // ----------------------------------- //
@@ -54,9 +59,18 @@ extension AXUIElement {
     func minimize() -> Bool {
         let result = AXUIElementSetAttributeValue(self, kAXMinimizedAttribute as CFString, kCFBooleanTrue)
         if result != .success {
-            warn("AXUIElement.minimize(): minize failed for \(String(describing: getTitle()))")
+            warn("AXUIElement.minimize(): minize failed for \(String(describing: windowTitle()))")
         }
         return result == .success
+    }
+    
+    func windowSize() -> CGSize? {
+        if let attr: AXValue = get(attr: .size) {
+            var size = CGSize.zero
+            AXValueGetValue(attr, .cgSize, &size)
+            return size
+        }
+        return nil
     }
     
     func windowID() -> CGWindowID? {
@@ -78,7 +92,7 @@ extension AXUIElement {
         return nil
     }
     
-    func getTitle() -> String? {
+    func windowTitle() -> String? {
         get(attr: .title)
     }
     

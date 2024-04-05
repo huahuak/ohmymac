@@ -30,15 +30,20 @@ class Window: Equatable {
         self.app = app
         self.nsApp = app.nsApp
         self.axWindow = axWindow
-        guard let level = axWindow.windowLevel(),
-              level == CGWindowLevelForKey(.normalWindow) else {
-            info("\(nsApp.localizedName ?? "unkown app") want to create unnormal window!")
+        guard let windowID = axWindow.windowID(),
+              let level = axWindow.windowLevel(),
+              level == CGWindowLevelForKey(.normalWindow),
+              axWindow.windowSize() != nil,
+              axWindow.windowTitle() != nil,
+              [kAXStandardWindowSubrole, kAXDialogSubrole].contains(axWindow.subrole())
+        else {
+            info("\(nsApp.localizedName ?? "unkown app") want to create no allowed window!")
             return nil
         }
-        guard let windowID = axWindow.windowID() else { return nil }
         self.windowID = windowID
         self.isPinned = false
         registerObserver()
+        info("application {\(nsApp.localizedName!)} append window is {\(axWindow.windowTitle()!)}")
         main.async { self.updateStatus() } // delay update status
     }
     
