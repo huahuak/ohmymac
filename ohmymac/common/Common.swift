@@ -13,12 +13,17 @@ typealias Fn = () -> Void
 
 let main = DispatchQueue.main
 let global = DispatchQueue.global()
+let event = DispatchQueue(label: "background", qos: .userInteractive)
 
-var deInitFunc: [Fn] = []
+var deInitFunc: [Fn] = [{
+    notify(msg: "Bye~")
+}]
 
 class ErrCode: Error {
     static let NoPermission: Int32 = -200
     static let Err: Int32 = -1
+    
+    static let RetryErr = ErrCode()
 }
 
 func notify(msg: String) {
@@ -43,14 +48,16 @@ func getCurrentTimestampInMilliseconds() -> Int64 {
     return milliseconds
 }
 
-func retry(f: () -> Bool, times: UInt8 = 3) {
-    var cnt = 0
-    let interval: useconds_t = 100 * 1000 // 100ms
-    while cnt < times {
-        if f() {
-            return
-        }
-        cnt += 1
-        usleep(interval)
+func retry(f: () throws -> Void, times: UInt8 = 3) {
+    if times <= 0 {
+        warn("retry timeout");
+        return
+    }
+    let interval: Double = 0.5
+    do {
+        try f()
+    } catch {
+        Thread.sleep(forTimeInterval: interval)
+        retry(f: f, times: times - 1)
     }
 }

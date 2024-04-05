@@ -7,7 +7,7 @@
 
 import Foundation
 
-let DEBUG = false
+let DEBUG = true
 
 func debugNotify(msg: String) {
     if !DEBUG { return }
@@ -16,10 +16,15 @@ func debugNotify(msg: String) {
 
 func warn(_ msg: String) {
     if !DEBUG { return }
-    debugPrint(msg)
+    debugPrint("warn: \(msg)")
 }
 
 func info(_ msg: String) {
     if !DEBUG { return }
-    debugPrint(msg)
+    debugPrint("info: \(msg)")
+}
+
+func debug(_ msg: String) {
+    if !DEBUG { return }
+    debugPrint("debug: \(msg)")
 }

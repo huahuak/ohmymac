@@ -25,10 +25,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
     
-    func applicationWillTerminate(_ aNotification: Notification) {
-        deInitFunc.forEach({ $0() })
-    }
-    
     func requestAccessibilityPermission() {
         let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
@@ -50,7 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     func setupCrashHandler() {
         NSSetUncaughtExceptionHandler { exception in
-            _ = writeTmp(content: exception.callStackSymbols.joined(separator: "\n"))
+            notify(msg: "\(exception.callStackSymbols.joined(separator: "\n"))")
         }
     }
 }

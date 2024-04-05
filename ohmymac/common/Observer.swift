@@ -11,62 +11,72 @@ import AppKit
 
 private var AXObserverHolder: [AXObserver] = []
 
-class EscapeFn {
-    let fn: Fn
+typealias ObserverHandlerFn = (AXUIElement) -> Void
+
+class EscapeObserverExecutor {
+    let fn: ObserverHandlerFn
     
-    init(fn: @escaping Fn) {
+    init(fn: @escaping ObserverHandlerFn) {
         self.fn = fn
-    }
-    
-    func exec() {
-        fn()
     }
 }
 
 class Observer {
-    static func add(notice: Notification.Name, handler: @escaping (Notification) -> Void) {
+    static func addGlobally(notice: Notification.Name, handler: @escaping (Notification) -> Void) {
         let observer = NSWorkspace.shared.notificationCenter
-            .addObserver(forName: notice, object: nil, queue: nil, using: handler)
+            .addObserver(forName: notice, object: nil, queue: nil) {
+                debug("Global Notification: \(notice)")
+                handler($0)
+            }
         deInitFunc.append({
             NSWorkspace.shared.notificationCenter.removeObserver(observer)
         })
     }
     
-    static func addAX(notification: String,
+    static func add(notifications: [String],
                       pid: pid_t,
-                      axApp: AXUIElement,
-                      fn: EscapeFn) -> Fn {
-        var axObserver: AXObserver? = nil
+                      axui: AXUIElement,
+                      fn: EscapeObserverExecutor) -> Fn {
         let fnPtr =  Unmanaged.passRetained(fn)
         func handler(observer: AXObserver,
                      element: AXUIElement,
                      notificationName: CFString,
                      ptr: UnsafeMutableRawPointer?) -> Void  {
-            let fn = Unmanaged<EscapeFn>.fromOpaque(ptr!).takeUnretainedValue()
-            fn.exec()
+            debug("AX Notification: \(notificationName)")
+            let executor = Unmanaged<EscapeObserverExecutor>.fromOpaque(ptr!).takeUnretainedValue()
+            executor.fn(element)
         }
         
+        var axObserver: AXObserver? = nil
         if AXObserverCreate(pid, handler, &axObserver) != .success {
             warn("Observer.addAX(): create failed!"); return {}
         }
-        if AXObserverAddNotification(axObserver!,
-                                     axApp, notification as CFString,
-                                     fnPtr.toOpaque()) != .success {
-            warn("Observer.addAX(): add failed!"); return {}
+        notifications.forEach {
+            if AXObserverAddNotification(axObserver!,
+                                         axui, $0 as CFString,
+                                         fnPtr.toOpaque()) != .success {
+                warn("Observer.addAX(): add failed!");
+            }
         }
-        CFRunLoopAddSource(RunLoop.current.getCFRunLoop(),
-                           AXObserverGetRunLoopSource(axObserver!),
-                           CFRunLoopMode.defaultMode)
+        main.async {
+            CFRunLoopAddSource(RunLoop.current.getCFRunLoop(),
+                               AXObserverGetRunLoopSource(axObserver!),
+                               CFRunLoopMode.defaultMode)
+        }
 
         let deinitCallback = {
-            CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(),
-                                  AXObserverGetRunLoopSource(axObserver!),
-                                  CFRunLoopMode.defaultMode)
-            let result = AXObserverRemoveNotification(axObserver!, axApp, notification as CFString)
-            if  result != .success {
-                warn("Observer.addAX(): remove failed! result is \(result.rawValue)")
+//            notifications.forEach {
+//                let result = AXObserverRemoveNotification(axObserver!, axui, $0 as CFString)
+//                if  result != .success {
+//                    warn("Observer.addAX(): remove failed! result is \(result.rawValue)")
+//                }
+//            }
+            main.async {
+                CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(),
+                                      AXObserverGetRunLoopSource(axObserver!),
+                                      CFRunLoopMode.defaultMode)
+                axObserver = nil
             }
-            axObserver = nil
             fnPtr.release()
         }  // deinit by caller
         return deinitCallback

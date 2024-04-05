@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		471F0C682BB9505500E00259 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C672BB9505500E00259 /* WindowManager.swift */; };
-		471F0C6A2BB976AC00E00259 /* AXWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C692BB976AC00E00259 /* AXWindow.swift */; };
+		471F0C6A2BB976AC00E00259 /* AXUIElementHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */; };
 		473715322BA21245003275F2 /* SelectText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473715312BA21245003275F2 /* SelectText.swift */; };
 		4741D89E2B97083100743990 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D89D2B97083100743990 /* HotKey */; };
 		4741D8A12B97088900743990 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D8A02B97088900743990 /* Atomics */; };
@@ -25,6 +25,8 @@
 		475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A12B96DDF70084460B /* GoogleSearch.swift */; };
 		475247AC2B96DDF70084460B /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A32B96DDF70084460B /* Translate.swift */; };
 		478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C91682BBC3DA60031E95C /* Hotkey.swift */; };
+		47A2C4332BBF459600F972F8 /* Window.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4322BBF459600F972F8 /* Window.swift */; };
+		47A2C4352BBF478300F972F8 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4342BBF478300F972F8 /* Application.swift */; };
 		47A2DF372BBD069200B7638F /* Observer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2DF362BBD069200B7638F /* Observer.swift */; };
 		47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A8BCD52BBB23BE00DCDA3C /* Image.swift */; };
 		47C9DEAC2BBAB1AF002189C6 /* SpaceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47C9DEAA2BBAB1AF002189C6 /* SpaceIdentifier.swift */; };
@@ -37,7 +39,7 @@
 
 /* Begin PBXFileReference section */
 		471F0C672BB9505500E00259 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
-		471F0C692BB976AC00E00259 /* AXWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWindow.swift; sourceTree = "<group>"; };
+		471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXUIElementHelper.swift; sourceTree = "<group>"; };
 		473715312BA21245003275F2 /* SelectText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectText.swift; sourceTree = "<group>"; };
 		475247692B96DA030084460B /* ohmymac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ohmymac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475247862B96DC860084460B /* ohmymac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ohmymac-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -54,6 +56,8 @@
 		475247A12B96DDF70084460B /* GoogleSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleSearch.swift; sourceTree = "<group>"; };
 		475247A32B96DDF70084460B /* Translate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translate.swift; sourceTree = "<group>"; };
 		478C91682BBC3DA60031E95C /* Hotkey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hotkey.swift; sourceTree = "<group>"; };
+		47A2C4322BBF459600F972F8 /* Window.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Window.swift; sourceTree = "<group>"; };
+		47A2C4342BBF478300F972F8 /* Application.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application.swift; sourceTree = "<group>"; };
 		47A2DF362BBD069200B7638F /* Observer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observer.swift; sourceTree = "<group>"; };
 		47A8BCD52BBB23BE00DCDA3C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		47C9DEAA2BBAB1AF002189C6 /* SpaceIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpaceIdentifier.swift; sourceTree = "<group>"; };
@@ -137,18 +141,28 @@
 		475247AE2B96E1620084460B /* compoment */ = {
 			isa = PBXGroup;
 			children = (
+				47A2C42F2BBF44B300F972F8 /* WindowManager */,
 				475247892B96DC860084460B /* Shortcut.swift */,
 				4752478B2B96DC860084460B /* WindowAction.swift */,
-				471F0C672BB9505500E00259 /* WindowManager.swift */,
 			);
 			path = compoment;
+			sourceTree = "<group>";
+		};
+		47A2C42F2BBF44B300F972F8 /* WindowManager */ = {
+			isa = PBXGroup;
+			children = (
+				471F0C672BB9505500E00259 /* WindowManager.swift */,
+				47A2C4322BBF459600F972F8 /* Window.swift */,
+				47A2C4342BBF478300F972F8 /* Application.swift */,
+			);
+			path = WindowManager;
 			sourceTree = "<group>";
 		};
 		47A8BCD42BBB239900DCDA3C /* common */ = {
 			isa = PBXGroup;
 			children = (
 				475247882B96DC860084460B /* Common.swift */,
-				471F0C692BB976AC00E00259 /* AXWindow.swift */,
+				471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */,
 				47A8BCD52BBB23BE00DCDA3C /* Image.swift */,
 				478C91682BBC3DA60031E95C /* Hotkey.swift */,
 				47E3970A2BBC816800E22718 /* Logger.swift */,
@@ -265,6 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */,
+				47A2C4332BBF459600F972F8 /* Window.swift in Sources */,
 				47A2DF372BBD069200B7638F /* Observer.swift in Sources */,
 				475247922B96DC860084460B /* AppDelegate.swift in Sources */,
 				471F0C682BB9505500E00259 /* WindowManager.swift in Sources */,
@@ -279,7 +294,7 @@
 				47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */,
 				47C9DEAF2BBAB1E9002189C6 /* Space.swift in Sources */,
 				4752478D2B96DC860084460B /* Menu.swift in Sources */,
-				471F0C6A2BB976AC00E00259 /* AXWindow.swift in Sources */,
+				471F0C6A2BB976AC00E00259 /* AXUIElementHelper.swift in Sources */,
 				475247902B96DC860084460B /* main.swift in Sources */,
 				475247A72B96DDF70084460B /* FocusManager.swift in Sources */,
 				475247AC2B96DDF70084460B /* Translate.swift in Sources */,
@@ -287,6 +302,7 @@
 				478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */,
 				4752478F2B96DC860084460B /* Shortcut.swift in Sources */,
 				47C9DEAC2BBAB1AF002189C6 /* SpaceIdentifier.swift in Sources */,
+				47A2C4352BBF478300F972F8 /* Application.swift in Sources */,
 				47C9DEAD2BBAB1AF002189C6 /* SpaceInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,7 +451,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -468,7 +484,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

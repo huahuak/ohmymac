@@ -41,10 +41,6 @@ fileprivate func initShortcut() {
     add(HotKey(key: .comma, modifiers: [.option]), translate)
     // googleSearch
     add(HotKey(key: .g, modifiers: [.option, .command]), googleSearch)
-    
-    Hotkey().doubleTrigger(modifiers: .shift) { // pin window
-       pinWindowHandler()
-    }
 }
 
 // MARK: - internal function
