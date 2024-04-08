@@ -10,7 +10,7 @@ import AppKit
 import Cocoa
 import HotKey
 
-var windowManager: WindowManager! = nil
+var windowManager: WindowManager? = nil
 
 func startWindowMenuManager() {
     windowManager = WindowManager()
@@ -18,7 +18,7 @@ func startWindowMenuManager() {
     Hotkey().doubleTrigger(modifiers: .shift) {
         if let app = NSWorkspace.shared.frontmostApplication,
            let mainWindow = AXUIElementCreateApplication(app.processIdentifier).getMainWindow(),
-           let window = windowManager.findWindow({ $0.windowID == mainWindow.windowID() }) {
+           let window = windowManager?.findWindow({ $0.windowID == mainWindow.windowID() }) {
                window.pin()
         }
     } // pin window shortcut
@@ -32,6 +32,9 @@ class WindowManager {
         return wss
     }()
     var applications: [Application] = []
+    
+    // status
+    var lastActiveWindowWeakRef: WindowCond? = nil
     
     
     init() {
@@ -79,7 +82,9 @@ class WindowManager {
             appendWindowFunc(nsapp, true) // add when application not found.
             if let active = findApplication(nsapp) {
                 active.notifyActivate()
-                applications.filter{ !$0.eq(nsapp) }.forEach{ $0.minimizeAll() } // minimize other application
+                // MARK: TODO 
+                // minimize other application, need to move to notifyWindowActivate()
+                WindowManager.minimizeOtherApplication(active.cond)
             }
             
         }
@@ -96,6 +101,57 @@ class WindowManager {
             }
         }
     }
+    
+    // ------------------------------------ //
+    // MARK: notification
+    // ----------------------------------- //
+    static func notifyWindowActivate(_ cond: WindowCond) {
+        guard let windowManager = windowManager else { return }
+        guard let window = windowManager.findWindow(cond) else { return }
+        guard let _ = window.app else { return }
+        
+        let interval = 3 * 60 * 1000 // 3min
+        if let  lastAcitveWindowRef = windowManager.lastActiveWindowWeakRef,
+           let lastActiveWindow = windowManager.findWindow(lastAcitveWindowRef),
+           let lastActiveApp = lastActiveWindow.app {
+            if getCurrentTimestampInMilliseconds() - lastActiveWindow.lastActiveTimestamp >= interval {
+                if lastActiveWindow.isPinned { return }
+                notify(msg: "\(lastActiveApp.name()) pinned")
+                lastActiveWindow.pin()
+            }
+        }
+        
+        windowManager.lastActiveWindowWeakRef = { [weak window] in
+            guard let window = window else {
+                windowManager.lastActiveWindowWeakRef = nil
+                return false
+            }
+            return window.cond(window: $0)
+        }
+        
+        
+        
+        // minimizeOtherApplication(app.cond) bug
+        // check other application lastactivetimestamp
+        
+    }
+    
+    
+    // ------------------------------------ //
+    // MARK: helper function
+    // ----------------------------------- //
+    func findApplication(_ nsapp: NSRunningApplication) -> Application? {
+        applications.first(where: { $0.nsApp.processIdentifier == nsapp.processIdentifier })
+    }
+    
+    func findWindow(_ cond: WindowCond) -> Window? {
+        for app in applications {
+            if let window = app.findWindow(cond) {
+                return window
+            }
+        }
+        return nil
+    }
 }
 
 extension WindowManager {
@@ -109,18 +165,12 @@ extension WindowManager {
         }
     }
     
-    func findApplication(_ nsapp: NSRunningApplication) -> Application? {
-        applications.first(where: { $0.nsApp.processIdentifier == nsapp.processIdentifier })
+    static func minimizeOtherApplication(_ cond: ApplicationCond) {
+        windowManager?.applications
+            .filter{ !cond($0) }.forEach{ $0.minimizeUnpinWindow() }
     }
     
-    func findWindow(_ cond: WindowCond) -> Window? {
-        for app in applications {
-            if let window = app.findWindow(cond) {
-                return window
-            }
-        }
-        return nil
-    }
+
 
 }
 

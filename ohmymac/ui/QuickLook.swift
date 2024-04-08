@@ -19,10 +19,10 @@ func openQuickLook(file: URL) {
     if !lock.lock() { debugPrint("QuickLook is locked."); return }
     ql.url = file
     
-    if let panel = QLPreviewPanel.shared(), 
-        fm.getFocused() {
-            panel.dataSource = ql
-            panel.makeKeyAndOrderFront(nil)
+    if let panel = QLPreviewPanel.shared() {
+        fm.getFocused()
+        panel.dataSource = ql
+        panel.makeKeyAndOrderFront(nil)
     }
 }
 
@@ -47,7 +47,7 @@ fileprivate class QuickLook: QLPreviewPanelDataSource {
 fileprivate let fm = {
     let fm = FocusManager(window: {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 270),
+            contentRect: NSRect(x: 0, y: 0, width: 0, height: 0),
             styleMask: [.miniaturizable, .closable, .resizable, .titled],
             backing: .buffered, defer: false)
         window.title = "QuickLook Window"
@@ -56,13 +56,16 @@ fileprivate let fm = {
         return window
     }())
     
-    fm.addObserver(name: NSWindow.willCloseNotification) { notice in
+    fm.addCallback {
+        if !lock.unlock() { debugPrint("ql unlock failed!"); return }
+    }
+    
+    Observer.addLocally(notice: NSWindow.willCloseNotification) { notice in
         if notice.object is NSWindow,
            notice.object as? NSWindow == QLPreviewPanel.shared() {
             fm.recoverFocused()
-            if !lock.unlock() { debugPrint("ql unlock failed!"); return }
         }
     }
-    
+
     return fm
 }()

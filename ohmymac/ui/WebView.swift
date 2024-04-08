@@ -20,7 +20,7 @@ fileprivate let lock = Lock(before: menu.busy, after: menu.free)
 func openWebView(url: URL) {
     if !lock.lock() { debugPrint("Webview is locked."); return }
     wvControler.open(url)
-    _ = fm.getFocused()
+    fm.getFocused()
 }
 
 class WebViewController: NSViewController {
@@ -108,7 +108,6 @@ fileprivate class WebViewWindow: NSWindow {
         self.standardWindowButton(.miniaturizeButton)?.isHidden = true
         self.standardWindowButton(.zoomButton)?.isHidden = true
         self.isMovableByWindowBackground = true
-        
     }
 }
 
@@ -129,11 +128,14 @@ fileprivate let fm = {
     window.title = "Google Search"
     
     let fm = FocusManager(window: window)
-
+    
+    fm.addCallback {
+        if !lock.unlock() { debugPrint("wv unlock failed!"); return }
+    }
+    
     let close = {
         fm.recoverFocused()
         wvControler.releaseWebView()
-        if !lock.unlock() { debugPrint("wv unlock failed!"); return }
     }
     
     let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
@@ -146,7 +148,7 @@ fileprivate let fm = {
         if event.modifierFlags.contains(.command) && event.characters == "o" {
             let (ok, _) = wvControler.isRunning.compareExchange(expected: 1, desired: 1, ordering: .relaxed)
             if !ok { return event }
-            let wvc = fm.window.contentViewController as! WebViewController
+            let wvc = window.contentViewController as! WebViewController
             if let url = wvc.wv?.url {
                 close()
                 NSWorkspace.shared.open(url)

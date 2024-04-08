@@ -8,6 +8,8 @@
 import Foundation
 import AppKit
 
+typealias ApplicationCond = (Application) -> Bool
+
 class Application {
     let nsApp: NSRunningApplication
     let axApp: AXUIElement
@@ -81,11 +83,18 @@ class Application {
     }
     
     func notifyActivate() {
-        windows.first{ $0.axWindow.isMainWindow() ?? false }?
+        let windowsOnCurrentSpace = windows
+            .filter{ $0.axWindow.spaceID4Window() == AXUIElement.spaceID() }
+        if windowsOnCurrentSpace.count == 1 {
+            windowsOnCurrentSpace.first?.addToMenu()
+            return
+        }
+        windowsOnCurrentSpace
+            .first{ $0.axWindow.isFocusedWindow() ?? false }?
             .addToMenu()
     }
     
-    func minimizeAll() {
+    func minimizeUnpinWindow() {
         windows
             .filter{ !$0.isPinned }
             .filter{ $0.axWindow.spaceID4Window() == AXUIElement.spaceID() }
@@ -96,6 +105,14 @@ class Application {
 extension Application {
     func eq(_ nsapp: NSRunningApplication) -> Bool {
         self.nsApp.processIdentifier == nsapp.processIdentifier
+    }
+    
+    func cond(_ app: Application) -> Bool {
+        self.eq(app.nsApp)
+    }
+    
+    func name() -> String {
+        return nsApp.localizedName ?? "Unknown App"
     }
     
     func showWindow(_ cond: WindowCond) throws {

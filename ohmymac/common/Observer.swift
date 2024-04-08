@@ -33,6 +33,17 @@ class Observer {
         })
     }
     
+    static func addLocally(notice: Notification.Name, handler: @escaping (Notification) -> Void) {
+        let observer = NotificationCenter.default
+            .addObserver(forName: notice, object: nil, queue: nil) {
+                debug("Locally Notification: \(notice)")
+                handler($0)
+            }
+        deInitFunc.append({
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        })
+    }
+    
     static func add(notifications: [String],
                       pid: pid_t,
                       axui: AXUIElement,

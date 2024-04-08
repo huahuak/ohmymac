@@ -13,41 +13,54 @@ import QuickLookUI
 // FocusManager which is used by ui, is used to let window get focused thought other app is in fullscreen,
 //    then activate original window when ui window is closed.
 
-class FocusManager {
-    var window: NSWindow
-    var callback: Fn?
+class FocusManager: NSWindowController, NSWindowDelegate {
+    private var defocused: Fn?
+    var callback: Fn? // callback when window closed.
     
     init(window: NSWindow) {
-        self.window = window
+        super.init(window: window)
+        window.delegate = self
     }
     
-    func getFocused() -> Bool {
-        let app = NSWorkspace.shared.frontmostApplication
-        self.callback = {
-            app?.activate()
-            self.callback = nil
-        }
-
-        NSWindowController(window: window).showWindow(nil)
-        let ok = NSRunningApplication.current.activate(options: [.activateAllWindows])
-        if !ok {
-            debugPrint("get focused failed")
-            callback?()
-            return false
-        }
-        return true
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
-
-    func recoverFocused() {
+    
+    func windowWillClose(_ notification: Notification) {
+        defocused?()
         callback?()
-        window.close()
     }
     
-    func addObserver(name: NSNotification.Name?, using: @escaping (Notification) -> Void) {
-        let observer = NotificationCenter.default
-            .addObserver(forName: name, object: nil, queue: nil, using: using)
-        deInitFunc.append {
-            NotificationCenter.default.removeObserver(observer)
+    func getFocused() {
+        let app = NSWorkspace.shared.frontmostApplication
+        self.defocused = { [weak self] in
+            app?.activate()
+            self?.defocused = nil
         }
+
+        showWindow(nil)
+        main.async {
+            Thread.sleep(forTimeInterval: 0.1)
+            let ok = NSRunningApplication.current.activate(options: [.activateAllWindows])
+            if !ok {
+                debugPrint("get focused failed")
+                self.window?.close()
+            }
+        }
+    }
+    
+    func recoverFocused() {
+        window?.close()
+    }
+    
+    func addCallback(fn: @escaping Fn) {
+        if let callback = self.callback {
+            self.callback = {
+                callback()
+                fn()
+            }
+            return
+        }
+        self.callback = fn
     }
 }

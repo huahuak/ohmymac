@@ -38,7 +38,7 @@ fileprivate func initShortcut() {
         WindowAction.center(front)
     })
     // translate
-    add(HotKey(key: .comma, modifiers: [.option]), translate)
+    Hotkey().doubleTrigger(modifiers: .option, handler: translate)
     // googleSearch
     add(HotKey(key: .g, modifiers: [.option, .command]), googleSearch)
 }

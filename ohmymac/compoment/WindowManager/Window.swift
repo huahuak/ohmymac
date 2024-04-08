@@ -24,6 +24,7 @@ class Window: Equatable {
     let windowID: CGWindowID
     var status: WindowStatus = .none
     var isPinned: Bool
+    var lastActiveTimestamp: Int64
     var deinitCallback: [Fn] = []
     
     init?(app: Application, axWindow: AXUIElement) {
@@ -41,7 +42,10 @@ class Window: Equatable {
             return nil
         }
         self.windowID = windowID
+        
         self.isPinned = false
+        self.lastActiveTimestamp = getCurrentTimestampInMilliseconds()
+        
         registerObserver()
         info("application {\(nsApp.localizedName!)} append window is {\(axWindow.windowTitle()!)}")
         main.async { self.updateStatus() } // delay update status
@@ -57,8 +61,12 @@ class Window: Equatable {
                 guard let window = self else { warn("Window.registerObserver(): window has been removed!"); return }
                 guard let app = window.app else { warn("Window.registerObserver(): app has been removed!"); return }
                 if axui.windowID() == nil {
+                    // ------------------------------------ //
+                    // bug to fix
+                    // must remove from menu first to release window ref now.
+                    // ----------------------------------- // 
+                    window.removeFromMenu() 
                     app.removeWindow(window.cond)
-                    window.removeFromMenu()
                     return
                 }
                 doing(app, window)
@@ -103,6 +111,8 @@ class Window: Equatable {
     func addToMenu() {
         do {
             try app?.showWindow(cond)
+            lastActiveTimestamp = getCurrentTimestampInMilliseconds()
+            WindowManager.notifyWindowActivate(cond)
         } catch {
             warn("delay update failed!")
             menu.show(btn)
@@ -124,7 +134,7 @@ class Window: Equatable {
     }
     
     // ------------------------------------ //
-    // for button
+    // MARK: for button
     // ----------------------------------- //
     func pin() {
         self.isPinned = true
@@ -165,13 +175,8 @@ class Window: Equatable {
             }
         }
         if let event = NSApp.currentEvent {
-            if event.modifierFlags.contains(.option) && event.modifierFlags.contains(.command) {
-                activateWindow()
-//                windowManager.minimizeOtherWindowExcept(self.cond)
-                return
-            }
             if event.modifierFlags.contains(.option) {
-//                minimize()
+                minimize()
                 return
             }
             if event.modifierFlags.contains(.shift) {
