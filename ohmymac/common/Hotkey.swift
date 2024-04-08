@@ -8,16 +8,25 @@
 import Foundation
 import AppKit
 
+fileprivate let allFlags: [NSEvent.ModifierFlags] = [.shift, .option, .command, .function, .control]
+
 class Hotkey {
-    var triggerTime: Int64 = 0
+    private var triggerTime: Double = 0
+    private let interval = 0.2
     
     init() {}
     
     func doubleTrigger(modifiers: NSEvent.ModifierFlags, handler: @escaping Fn) {
         if let monitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: { [self] event in
             if !event.modifierFlags.contains(modifiers) { return }
-            let now = getCurrentTimestampInMilliseconds()
-            if now - triggerTime < 200 { // trigger double
+            for flag in allFlags.filter({ $0 != modifiers }) {
+                if event.modifierFlags.contains(flag) {
+                    triggerTime  = 0
+                    return
+                }
+            }
+            let now = event.timestamp
+            if now - triggerTime < interval {
                 main.async { handler() }
             }
             triggerTime = now
