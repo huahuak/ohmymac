@@ -137,6 +137,7 @@ class Window: Equatable {
     // MARK: for button
     // ----------------------------------- //
     func pin() {
+        if status != .onSpace { return }
         self.isPinned = true
         self.btn.image = iconAddSubscript(img: self.baseIcon, sub: type(of: self).pinIcon)
     }

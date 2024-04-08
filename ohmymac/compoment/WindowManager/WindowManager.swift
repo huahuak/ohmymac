@@ -115,7 +115,7 @@ class WindowManager {
            let lastActiveWindow = windowManager.findWindow(lastAcitveWindowRef),
            let lastActiveApp = lastActiveWindow.app {
             if getCurrentTimestampInMilliseconds() - lastActiveWindow.lastActiveTimestamp >= interval {
-                if lastActiveWindow.isPinned { return }
+                if lastActiveWindow.isPinned || lastActiveWindow.status != .onSpace { return }
                 notify(msg: "\(lastActiveApp.name()) pinned")
                 lastActiveWindow.pin()
             }
