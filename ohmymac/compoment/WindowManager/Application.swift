@@ -23,12 +23,12 @@ class Application {
         self.nsApp = app
         self.axApp = AXUIElementCreateApplication(nsApp.processIdentifier)
         registerObserver()
-        info("\(nsApp.localizedName ?? "unkown app") ✅")
+        info("\(name()) ✅")
     }
     
     deinit {
         deinitCallback.forEach{$0()}
-        info("\(nsApp.localizedName ?? "unkown app") ❌")
+        info("\(name()) ❌")
     }
     
     func registerObserver() {
@@ -82,16 +82,12 @@ class Application {
         windows.forEach{ $0.updateStatus() }
     }
     
+    /// notifyActivate is called when app activate
+    /// then choose last active window to show
     func notifyActivate() {
-        let windowsOnCurrentSpace = windows
-            .filter{ $0.axWindow.spaceID4Window() == AXUIElement.spaceID() }
-        if windowsOnCurrentSpace.count == 1 {
-            windowsOnCurrentSpace.first?.addToMenu()
-            return
+        if let lastActiveWindow = shown.last {
+            lastActiveWindow.addToMenu()
         }
-        windowsOnCurrentSpace
-            .first{ $0.axWindow.isFocusedWindow() ?? false }?
-            .addToMenu()
     }
     
     func minimizeUnpinWindow() {
