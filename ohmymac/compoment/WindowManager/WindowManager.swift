@@ -14,14 +14,6 @@ var windowManager: WindowManager? = nil
 
 func startWindowMenuManager() {
     windowManager = WindowManager()
-    
-    Hotkey().doubleTrigger(modifiers: .shift) {
-        if let app = NSWorkspace.shared.frontmostApplication,
-           let mainWindow = AXUIElementCreateApplication(app.processIdentifier).getMainWindow(),
-           let window = windowManager?.findWindow({ $0.windowID == mainWindow.windowID() }) {
-               window.pin()
-        }
-    } // pin window shortcut
 }
 
 
@@ -41,58 +33,43 @@ class WindowManager {
         // ------------------------------------ //
         // init status
         // ----------------------------------- //
-        let appendWindowFunc = { [self] (nsapp: NSRunningApplication, redo: Bool) in
+        let initApplicationFunc = { [self] (nsapp: NSRunningApplication) in
             if nsapp.localizedName == "ohmymac" { return }
             if nsapp.localizedName == "Finder" { return }
             if applications.contains(where: { nsapp.processIdentifier == $0.nsApp.processIdentifier }) {
                 return
             }
             let axApp = AXUIElementCreateApplication(nsapp.processIdentifier)
-            retry {
-                guard var axWindows = axApp.getAllWindows() else {
-                    if redo { throw ErrCode.RetryErr };
-                    return
-                }
-                if axWindows.count == 0 {
-                    if let window = axApp.getMainWindow() { axWindows.append(window) }
-                    if let window = axApp.getFocusedWindow() { axWindows.append(window) }
-                    if axWindows.count == 0 {
-                        if redo { throw ErrCode.RetryErr };
-                        return
-                    }
-                }
-                let app = Application(app: nsapp)
-                applications.append(app)
-                main.async {
-                    axWindows.forEach{
-                        guard let window = Window(app: app, axWindow: $0) else { return }
-                        app.appendWindow(window)
-                    }
+            guard let axWindows = try WindowManager.getAllWindow(axApp) else { return }
+            let app = Application(app: nsapp)
+            applications.append(app)
+            main.async {
+                axWindows.forEach{
+                    guard let window = Window(app: app, axWindow: $0) else { return }
+                    app.appendWindow(window)
                 }
             }
         }
         NSWorkspace.shared.runningApplications.forEach({ nsapp in
             if nsapp.isHidden { return }
-            global.async { appendWindowFunc(nsapp, false) }
+            global.async {
+                retry(f: { try initApplicationFunc(nsapp) }, times: 1)
+            }
         })
         observe(NSWorkspace.didTerminateApplicationNotification) { [self] nsapp in
             applications.removeAll{ $0.nsApp.processIdentifier == nsapp.processIdentifier }
         }
         observe(NSWorkspace.didActivateApplicationNotification) { [self] nsapp in
-            appendWindowFunc(nsapp, true) // add when application not found.
+            retry { try initApplicationFunc(nsapp) }
             if let active = findApplication(nsapp) {
                 active.notifyActivate()
-                // MARK: TODO 
-                // minimize other application, need to move to notifyWindowActivate()
-                WindowManager.minimizeOtherApplication(active.cond)
             }
-            
         }
         observe(NSWorkspace.didHideApplicationNotification) { [self] nsapp in
             findApplication(nsapp)?.notifyHidden()
         }
         observe(NSWorkspace.didUnhideApplicationNotification) { [self] nsapp in
-            appendWindowFunc(nsapp, false)
+            retry { try initApplicationFunc(nsapp) } // add when application not found.
             findApplication(nsapp)?.notifyShown()
         }
         Observer.addGlobally(notice: NSWorkspace.activeSpaceDidChangeNotification) { [self] _ in
@@ -110,30 +87,19 @@ class WindowManager {
         guard let window = windowManager.findWindow(cond) else { return }
         guard let _ = window.app else { return }
         
-        let interval = 3 * 60 * 1000 // 3min
-        if let  lastAcitveWindowRef = windowManager.lastActiveWindowWeakRef,
-           let lastActiveWindow = windowManager.findWindow(lastAcitveWindowRef),
-           let lastActiveApp = lastActiveWindow.app {
-            if getCurrentTimestampInMilliseconds() - lastActiveWindow.lastActiveTimestamp >= interval {
-                if lastActiveWindow.isPinned || lastActiveWindow.status != .onSpace { return }
-                notify(msg: "\(lastActiveApp.name()) pinned")
-                lastActiveWindow.pin()
+        // check window
+        windowManager.applications.forEach { app in
+            if app.name() == "Weather" {
+                let ok = 1
+            }
+            var axWindows: [AXUIElement]?
+            retry(f: {
+                axWindows = try WindowManager.getAllWindow(app.axApp)
+            }, times: 1)
+            if axWindows == nil {
+                windowManager.applications.removeAll(where: app.cond)
             }
         }
-        
-        windowManager.lastActiveWindowWeakRef = { [weak window] in
-            guard let window = window else {
-                windowManager.lastActiveWindowWeakRef = nil
-                return false
-            }
-            return window.cond(window: $0)
-        }
-        
-        
-        
-        // minimizeOtherApplication(app.cond) bug
-        // check other application lastactivetimestamp
-        
     }
     
     
@@ -152,6 +118,22 @@ class WindowManager {
         }
         return nil
     }
+    
+    /// getAllWindow will try find window that is belongs to application
+    /// if failed, getAllWindow() will throw RetryErr
+    static func getAllWindow(_ axApp: AXUIElement) throws -> [AXUIElement]?  {
+        guard var axWindows = axApp.getAllWindows() else {
+            throw ErrCode.RetryErr
+        }
+        if axWindows.count == 0 {
+            if let window = axApp.getMainWindow() { axWindows.append(window) }
+            if let window = axApp.getFocusedWindow() { axWindows.append(window) }
+            if axWindows.count == 0 {
+                throw ErrCode.RetryErr
+            }
+        }
+        return axWindows
+    }
 }
 
 extension WindowManager {
@@ -164,14 +146,6 @@ extension WindowManager {
             }
         }
     }
-    
-    static func minimizeOtherApplication(_ cond: ApplicationCond) {
-        windowManager?.applications
-            .filter{ !cond($0) }.forEach{ $0.minimizeUnpinWindow() }
-    }
-    
-
-
 }
 
 

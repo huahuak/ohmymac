@@ -93,15 +93,7 @@ class Window: Equatable {
         switch status {
         case .none:
             return
-        case .onSpace:
-            if old == .fullscreen {
-                pin()
-            }
-            addToMenu()
-        case .fullscreen:
-            if old == .onSpace {
-                unpin()
-            }
+        case .onSpace, .fullscreen:
             addToMenu()
         case .minimize:
             removeFromMenu()
@@ -120,7 +112,6 @@ class Window: Equatable {
     }
     
     func removeFromMenu() {
-        unpin()
         do {
             try app?.unshowWindow(cond)
         } catch {
@@ -136,17 +127,6 @@ class Window: Equatable {
     // ------------------------------------ //
     // MARK: for button
     // ----------------------------------- //
-    func pin() {
-        if status != .onSpace { return }
-        self.isPinned = true
-        self.btn.image = iconAddSubscript(img: self.baseIcon, sub: type(of: self).pinIcon)
-    }
-    
-    func unpin() {
-        self.isPinned = false
-        self.btn.image = self.baseIcon
-    }
-    
     lazy var baseIcon = {
         let img = nsApp.icon
         img?.size = NSSize(width: 22, height: 22)
@@ -178,10 +158,6 @@ class Window: Equatable {
         if let event = NSApp.currentEvent {
             if event.modifierFlags.contains(.option) {
                 minimize()
-                return
-            }
-            if event.modifierFlags.contains(.shift) {
-                pin()
                 return
             }
             activateWindow()
