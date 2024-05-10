@@ -1,18 +1,30 @@
 # ohmymac
 
-[ohmymac](https://github.com/huahuak/ohmymac) is a statusbar-only application, which is used to extend functionality of mac.
+[ohmymac](https://github.com/huahuak/ohmymac) is a menubar-only application, which is used to extend functionality of mac.
 
 *ohmymac is currently under development.*
 
-##  For now
+##  Features
 
 ### Window
 
-> ‼️ WARNNING
->
-> Disable the Stage Manager
+#### Design Philosophy
 
-- You will find the most recent three windows in the menu bar.
+- When using MacBook, I will lose direction in multiple windows and spaces, Because window and Space switch logic is so complex. For Example, when I change to another space, I will forget the old windows when need to go back.
+
+- So I need to **remember the most recent windows** (just record the order of the openning windows) globally.
+
+  **Basic Rule**
+
+  | Condition                              | Action                                | Done |
+  | :------------------------------------- | :------------------------------------ | :--: |
+  | When window unhide/activate            | append applicatoin icon to menubar.   |  ✅   |
+  | When window hide/close                 | remove application icon from menubar. |  ✅   |
+  | When click application icon on menubar | switch to last activated window.      |  ✅   |
+
+#### Description
+
+- You will find the **most recent three** windows in the menu bar.
 
   ![Screenshot 2024-03-14 at 23.09.30](README.assets/Screenshot%202024-03-14%20at%2023.09.30.png)
 
@@ -41,8 +53,4 @@
 - `opt+l` / `opt+;` / `opt+'` / `opt+m`: adjust window size to small, middle, large, full.
 
   ![Screenshot 2024-03-05 at 13.58.40](README.assets/Screenshot%202024-03-05%20at%2013.58.40.png)
-
-
-
-  ## Features
 

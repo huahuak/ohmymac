@@ -21,10 +21,9 @@ class Window: Equatable {
     weak var app: Application? // hold parent application
     var axWindow: AXUIElement
     let nsApp: NSRunningApplication
-    let windowID: CGWindowID
+    var windowID: CGWindowID
     var status: WindowStatus = .none
     var isPinned: Bool
-    var lastActiveTimestamp: Int64
     var deinitCallback: [Fn] = []
     
     init?(app: Application, axWindow: AXUIElement) {
@@ -44,10 +43,9 @@ class Window: Equatable {
         self.windowID = windowID
         
         self.isPinned = false
-        self.lastActiveTimestamp = getCurrentTimestampInMilliseconds()
         
         registerObserver()
-        info("application {\(nsApp.localizedName!)} append window is {\(axWindow.windowTitle()!)}")
+        info("application {\(nsApp.localizedName!)} append window is {\(axWindow.windowTitle()!)} ✅")
         main.async { self.updateStatus() } // delay update status
     }
     
@@ -61,12 +59,7 @@ class Window: Equatable {
                 guard let window = self else { warn("Window.registerObserver(): window has been removed!"); return }
                 guard let app = window.app else { warn("Window.registerObserver(): app has been removed!"); return }
                 if axui.windowID() == nil {
-                    // ------------------------------------ //
-                    // bug to fix
-                    // must remove from menu first to release window ref now.
-                    // ----------------------------------- // 
-                    window.removeFromMenu() 
-                    app.removeWindow(window.cond)
+                    app.notifyWindowClosed(window.cond)
                     return
                 }
                 doing(app, window)
@@ -87,36 +80,25 @@ class Window: Equatable {
     func updateStatus() {
         let old = status
         status = Window.getStatus(axWindow: axWindow)
-        if old == status {
-            return
-        }
+//        if old == status {
+//            return
+//        }
         switch status {
         case .none:
             return
         case .onSpace, .fullscreen:
             addToMenu()
         case .minimize:
-            removeFromMenu()
+            app?.notifyWindowMinimized(cond)
         }
     }
     
     func addToMenu() {
         do {
-            try app?.showWindow(cond)
-            lastActiveTimestamp = getCurrentTimestampInMilliseconds()
-            WindowManager.notifyWindowActivate(cond)
+            try app?.notifyWindowDeminimized(cond)
         } catch {
             warn("delay update failed!")
             menu.show(btn)
-        }
-    }
-    
-    func removeFromMenu() {
-        do {
-            try app?.unshowWindow(cond)
-        } catch {
-            warn("delay update failed!")
-            menu.clean(btn)
         }
     }
     
@@ -148,19 +130,43 @@ class Window: Equatable {
         return btn
     }()
     
-    @objc func clickAction(_ sender: NSButton) {
-        let activateWindow = {
-            let window = sender.target as! Window
-            if !window.nsApp.activate() {
-                print("activate failed.")
+    /// The following function was ported from https://github.com/Hammerspoon/hammerspoon/issues/370#issuecomment-545545468
+    func makeKeyWindow(_ psn: ProcessSerialNumber) -> Void {
+        var psn_ = psn
+        var bytes1 = [UInt8](repeating: 0, count: 0xf8)
+        bytes1[0x04] = 0xF8
+        bytes1[0x08] = 0x01
+        bytes1[0x3a] = 0x10
+        var bytes2 = [UInt8](repeating: 0, count: 0xf8)
+        bytes2[0x04] = 0xF8
+        bytes2[0x08] = 0x02
+        bytes2[0x3a] = 0x10
+        memcpy(&bytes1[0x3c], &windowID, MemoryLayout<UInt32>.size)
+        memset(&bytes1[0x20], 0xFF, 0x10)
+        memcpy(&bytes2[0x3c], &windowID, MemoryLayout<UInt32>.size)
+        memset(&bytes2[0x20], 0xFF, 0x10)
+        [bytes1, bytes2].forEach { bytes in
+            _ = bytes.withUnsafeBufferPointer() { pointer in
+                SLPSPostEventRecordTo(&psn_, &UnsafeMutablePointer(mutating: pointer.baseAddress)!.pointee)
             }
+        }
+    }
+    
+    @objc func clickAction(_ sender: NSButton) {
+        let doActivateWindow = {
+            let window = sender.target as! Window
+            var psn = ProcessSerialNumber()
+            GetProcessForPID(window.nsApp.processIdentifier, &psn)
+            _SLPSSetFrontProcessWithOptions(&psn, window.windowID, SLPSMode.userGenerated.rawValue)
+            window.makeKeyWindow(psn)
+            window.axWindow.focusWindow()
         }
         if let event = NSApp.currentEvent {
             if event.modifierFlags.contains(.option) {
                 minimize()
                 return
             }
-            activateWindow()
+            doActivateWindow()
         }
     }
     

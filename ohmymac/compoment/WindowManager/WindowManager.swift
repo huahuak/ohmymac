@@ -30,9 +30,6 @@ class WindowManager {
     
     
     init() {
-        // ------------------------------------ //
-        // init status
-        // ----------------------------------- //
         let initApplicationFunc = { [self] (nsapp: NSRunningApplication) in
             if nsapp.localizedName == "ohmymac" { return }
             if nsapp.localizedName == "Finder" { return }
@@ -50,33 +47,39 @@ class WindowManager {
                 }
             }
         }
+        
+        // init status
         NSWorkspace.shared.runningApplications.forEach({ nsapp in
             if nsapp.isHidden { return }
             global.async {
                 retry(f: { try initApplicationFunc(nsapp) }, times: 1)
             }
         })
-        observe(NSWorkspace.didTerminateApplicationNotification) { [self] nsapp in
-            applications.removeAll{ $0.nsApp.processIdentifier == nsapp.processIdentifier }
-        }
+        
+        /// Design Philosophy:
+        /// - When window unhide/activate: append applicatoin icon to menubar.
         observe(NSWorkspace.didActivateApplicationNotification) { [self] nsapp in
             retry { try initApplicationFunc(nsapp) }
             if let active = findApplication(nsapp) {
-                active.notifyActivate()
+                active.notifyActivate(axWindow: nil)
             }
-        }
-        observe(NSWorkspace.didHideApplicationNotification) { [self] nsapp in
-            findApplication(nsapp)?.notifyHidden()
         }
         observe(NSWorkspace.didUnhideApplicationNotification) { [self] nsapp in
             retry { try initApplicationFunc(nsapp) } // add when application not found.
             findApplication(nsapp)?.notifyShown()
         }
-        Observer.addGlobally(notice: NSWorkspace.activeSpaceDidChangeNotification) { [self] _ in
-            applications.forEach {
-                $0.notifyShown()
-            }
+        
+        /// - When window hide/close: remove application icon from menubar.
+        observe(NSWorkspace.didTerminateApplicationNotification) { [self] nsapp in
+            applications.removeAll{ $0.nsApp.processIdentifier == nsapp.processIdentifier }
         }
+        observe(NSWorkspace.didHideApplicationNotification) { [self] nsapp in
+            findApplication(nsapp)?.notifyHidden()
+        }
+        
+        /// - When space changed, we need to update window status.
+//        Observer.addGlobally(notice: NSWorkspace.activeSpaceDidChangeNotification) { [self] _ in
+//        }
     }
     
     // ------------------------------------ //
@@ -89,9 +92,6 @@ class WindowManager {
         
         // check window
         windowManager.applications.forEach { app in
-            if app.name() == "Weather" {
-                let ok = 1
-            }
             var axWindows: [AXUIElement]?
             retry(f: {
                 axWindows = try WindowManager.getAllWindow(app.axApp)
@@ -126,8 +126,8 @@ class WindowManager {
             throw ErrCode.RetryErr
         }
         if axWindows.count == 0 {
-            if let window = axApp.getMainWindow() { axWindows.append(window) }
-            if let window = axApp.getFocusedWindow() { axWindows.append(window) }
+            if let window = axApp.getMainWindow() { axWindows.append(window); return axWindows }
+            if let window = axApp.getFocusedWindow() { axWindows.append(window); return axWindows }
             if axWindows.count == 0 {
                 throw ErrCode.RetryErr
             }

@@ -13,10 +13,9 @@ typealias ApplicationCond = (Application) -> Bool
 class Application {
     let nsApp: NSRunningApplication
     let axApp: AXUIElement
-    // different status wind
+    // different status window
     private var windows: [Window] = []
-    private var shown: [Window] = []
-    var UIUpdateFn: [Fn] = []
+    private var lastWindow: Window?
     var deinitCallback: [Fn] = []
     
     init(app: NSRunningApplication) {
@@ -48,9 +47,8 @@ class Application {
             guard let window = Window(app: app, axWindow: axui) else { return }
             app.appendWindow(window)
         }
-        registerHelper(kAXFocusedWindowChangedNotification,
-                       kAXMainWindowChangedNotification) {app, axui in
-            app.notifyActivate()
+        registerHelper(kAXMainWindowChangedNotification) {app, axui in
+            app.notifyActivate(axWindow: axui)
         }
     }
     
@@ -60,42 +58,94 @@ class Application {
             return
         }
         windows.append(window)
+        if let last = lastWindow {
+            menu.clean(last.btn)
+        }
+        lastWindow = window
+        menu.show(window.btn)
     }
     
-    func removeWindow(_ cond: WindowCond) {
-        guard let _ = windows.first(where: cond) else {
+    /// remove all window ref in the application, then remove from menubar automatically.
+    private func removeWindow(_ cond: WindowCond) {
+        guard let window = windows.first(where: cond) else {
             warn("Application.removeWindow(): window not found!")
             return
         }
+        
         windows.removeAll(where: cond)
+        if window == lastWindow {
+            lastWindow = nil
+        }
+        menu.clean(window.btn)
     }
     
-    func findWindow(_ cond: WindowCond) -> Window? {
-        windows.first(where: cond)
+    /// remove last window btn, then add new window into menubar
+    func notifyWindowDeminimized(_ cond: WindowCond) throws {
+        guard let window = findWindow(cond) else { throw ErrCode() }
+        removeWindow(window.cond)
+        appendWindow(window)
     }
     
+    // MARK: window notification
+    /// first remove window,
+    /// then add the most recent window to menubar.
+    func notifyWindowClosed(_ cond: WindowCond) {
+        removeWindow(cond)
+        
+        if let last = windows.last {
+            lastWindow = last
+            menu.show(last.btn)
+        }
+    }
+    
+    func notifyWindowMinimized(_ cond: WindowCond) {
+        guard let window = findWindow(cond) else { return }
+        removeWindow(cond)
+        windows.insert(window, at: 0) // move to minimized window head.
+        
+        if let last = windows.last {
+            lastWindow = last
+            menu.show(last.btn)
+        }
+    }
+    
+    
+    // MARK: application notification
+    /// remove window in menubar.
     func notifyHidden() {
-        windows.forEach{ $0.removeFromMenu() }
+        if let last = lastWindow {
+            menu.clean(last.btn)
+        }
     }
     
     func notifyShown() {
-        windows.forEach{ $0.updateStatus() }
+        if let last = lastWindow {
+            menu.show(last.btn)
+        }
     }
     
     /// notifyActivate is called when app activate
     /// then choose last active window to show
-    func notifyActivate() {
-        if let lastActiveWindow = shown.last {
-            lastActiveWindow.addToMenu()
+    func notifyActivate(axWindow: AXUIElement?) {
+        // axWindow is main window which is changed
+        if let axw = axWindow {
+            if let window = windows.filter({ $0.axWindow.windowID() == axw.windowID() }).first {
+                removeWindow(window.cond)
+                appendWindow(window)
+            } else {
+                // window not found, need to append
+                guard let window = Window(app: self, axWindow: axw) else { return }
+                appendWindow(window)
+            }
         }
+        // axWindow is nil, just try refresh
+        if let last = lastWindow {
+            removeWindow(last.cond)
+            appendWindow(last)
+        }
+        
     }
-    
-    func minimizeUnpinWindow() {
-        windows
-            .filter{ !$0.isPinned }
-            .filter{ $0.axWindow.spaceID4Window() == AXUIElement.spaceID() }
-            .forEach{ $0.minimize() }
-    }
+
 }
 
 extension Application {
@@ -111,20 +161,9 @@ extension Application {
         return nsApp.localizedName ?? "Unknown App"
     }
     
-    func showWindow(_ cond: WindowCond) throws {
-        guard let window = findWindow(cond) else { throw ErrCode() }
-        shown.removeAll(where: window.cond)
-        shown.append(window)
-        shown.forEach{ menu.clean($0.btn) }
-        menu.show(window.btn)
+    func findWindow(_ cond: WindowCond) -> Window? {
+        windows.first(where: cond)
     }
     
-    func unshowWindow(_ cond: WindowCond) throws {
-        guard let window = findWindow(cond) else { throw ErrCode() }
-        shown.removeAll(where: window.cond)
-        menu.clean(window.btn)
-        if let show = shown.last {
-            menu.show(show.btn)
-        }
-    }
+
 }

@@ -7,11 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4710CFE72BEE983200751AEC /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4710CFE62BEE983200751AEC /* SkyLight.framework */; };
 		471F0C682BB9505500E00259 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C672BB9505500E00259 /* WindowManager.swift */; };
 		471F0C6A2BB976AC00E00259 /* AXUIElementHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */; };
 		473715322BA21245003275F2 /* SelectText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473715312BA21245003275F2 /* SelectText.swift */; };
-		4741D89E2B97083100743990 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D89D2B97083100743990 /* HotKey */; };
-		4741D8A12B97088900743990 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 4741D8A02B97088900743990 /* Atomics */; };
 		4752478D2B96DC860084460B /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247872B96DC860084460B /* Menu.swift */; };
 		4752478E2B96DC860084460B /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247882B96DC860084460B /* Common.swift */; };
 		4752478F2B96DC860084460B /* Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247892B96DC860084460B /* Shortcut.swift */; };
@@ -24,6 +23,8 @@
 		475247A82B96DDF70084460B /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479E2B96DDF70084460B /* WebView.swift */; };
 		475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A12B96DDF70084460B /* GoogleSearch.swift */; };
 		475247AC2B96DDF70084460B /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A32B96DDF70084460B /* Translate.swift */; };
+		476A3EF42BEA469F006F5E9D /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 476A3EF32BEA469F006F5E9D /* Atomics */; };
+		476A3EF72BEA46A4006F5E9D /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 476A3EF62BEA46A4006F5E9D /* HotKey */; };
 		478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C91682BBC3DA60031E95C /* Hotkey.swift */; };
 		47A2C4332BBF459600F972F8 /* Window.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4322BBF459600F972F8 /* Window.swift */; };
 		47A2C4352BBF478300F972F8 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4342BBF478300F972F8 /* Application.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4710CFE62BEE983200751AEC /* SkyLight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SkyLight.framework; path = ../../../../System/Library/PrivateFrameworks/SkyLight.framework; sourceTree = "<group>"; };
 		471F0C672BB9505500E00259 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXUIElementHelper.swift; sourceTree = "<group>"; };
 		473715312BA21245003275F2 /* SelectText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectText.swift; sourceTree = "<group>"; };
@@ -76,19 +78,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4741D89E2B97083100743990 /* HotKey in Frameworks */,
-				4741D8A12B97088900743990 /* Atomics in Frameworks */,
+				4710CFE72BEE983200751AEC /* SkyLight.framework in Frameworks */,
+				476A3EF72BEA46A4006F5E9D /* HotKey in Frameworks */,
+				476A3EF42BEA469F006F5E9D /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4710CFE52BEE983100751AEC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4710CFE62BEE983200751AEC /* SkyLight.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		475247602B96DA030084460B = {
 			isa = PBXGroup;
 			children = (
 				4752476B2B96DA030084460B /* ohmymac */,
 				4752476A2B96DA030084460B /* Products */,
+				4710CFE52BEE983100751AEC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -218,8 +230,8 @@
 			);
 			name = ohmymac;
 			packageProductDependencies = (
-				4741D89D2B97083100743990 /* HotKey */,
-				4741D8A02B97088900743990 /* Atomics */,
+				476A3EF32BEA469F006F5E9D /* Atomics */,
+				476A3EF62BEA46A4006F5E9D /* HotKey */,
 			);
 			productName = "awesome-mac";
 			productReference = 475247692B96DA030084460B /* ohmymac.app */;
@@ -233,7 +245,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					475247682B96DA030084460B = {
 						CreatedOnToolsVersion = 15.0;
@@ -251,8 +263,8 @@
 			);
 			mainGroup = 475247602B96DA030084460B;
 			packageReferences = (
-				4741D89C2B97083100743990 /* XCRemoteSwiftPackageReference "HotKey" */,
-				4741D89F2B97088900743990 /* XCRemoteSwiftPackageReference "swift-atomics" */,
+				476A3EF22BEA469F006F5E9D /* XCRemoteSwiftPackageReference "swift-atomics" */,
+				476A3EF52BEA46A4006F5E9D /* XCRemoteSwiftPackageReference "HotKey" */,
 			);
 			productRefGroup = 4752476A2B96DA030084460B /* Products */;
 			projectDirPath = "";
@@ -344,6 +356,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -407,6 +420,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -439,7 +453,8 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -451,13 +466,17 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "ohmymac/ohmymac-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Debug;
 		};
@@ -472,7 +491,8 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -484,12 +504,16 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.huahuak.ohmymac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "ohmymac/ohmymac-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Release;
 		};
@@ -517,15 +541,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4741D89C2B97083100743990 /* XCRemoteSwiftPackageReference "HotKey" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/soffes/HotKey";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		4741D89F2B97088900743990 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+		476A3EF22BEA469F006F5E9D /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-atomics.git";
 			requirement = {
@@ -533,18 +549,26 @@
 				minimumVersion = 1.2.0;
 			};
 		};
+		476A3EF52BEA46A4006F5E9D /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4741D89D2B97083100743990 /* HotKey */ = {
+		476A3EF32BEA469F006F5E9D /* Atomics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4741D89C2B97083100743990 /* XCRemoteSwiftPackageReference "HotKey" */;
-			productName = HotKey;
-		};
-		4741D8A02B97088900743990 /* Atomics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4741D89F2B97088900743990 /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			package = 476A3EF22BEA469F006F5E9D /* XCRemoteSwiftPackageReference "swift-atomics" */;
 			productName = Atomics;
+		};
+		476A3EF62BEA46A4006F5E9D /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 476A3EF52BEA46A4006F5E9D /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

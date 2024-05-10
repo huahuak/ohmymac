@@ -41,7 +41,7 @@ extension AXUIElement {
     }
     
     // ------------------------------------ //
-    // for window
+    // MARK: for window
     // ----------------------------------- //
     func isFullScreent() -> Bool? {
         get(str: kAXFullscreenAttribute)
@@ -66,6 +66,10 @@ extension AXUIElement {
             warn("AXUIElement.minimize(): minize failed for \(String(describing: windowTitle()))")
         }
         return result == .success
+    }
+    
+    func focusWindow() {
+        AXUIElementPerformAction(self, kAXRaiseAction as CFString)
     }
     
     func windowSize() -> CGSize? {
@@ -159,6 +163,12 @@ enum CGSSpaceMask: Int {
     case all = 7
 }
 
+enum SLPSMode: UInt32 {
+    case allWindows = 0x100
+    case userGenerated = 0x200
+    case noWindows = 0x400
+}
+
 @_silgen_name("CGSMainConnectionID")
 func CGSMainConnectionID() -> CGSConnectionID
 
@@ -173,3 +183,12 @@ fileprivate func CGSManagedDisplayGetCurrentSpace(_ cid: CGSConnectionID, _ disp
 
 @_silgen_name("CGSGetWindowLevel") @discardableResult
 func CGSGetWindowLevel(_ cid: CGSConnectionID, _ wid: CGWindowID, _ level: inout CGWindowLevel) -> CGError
+
+@_silgen_name("GetProcessForPID") @discardableResult
+func GetProcessForPID(_ pid: pid_t, _ psn: inout ProcessSerialNumber) -> OSStatus
+
+@_silgen_name("SLPSPostEventRecordTo") @discardableResult
+func SLPSPostEventRecordTo(_ psn: inout ProcessSerialNumber, _ bytes: inout UInt8) -> CGError
+
+@_silgen_name("_SLPSSetFrontProcessWithOptions") @discardableResult
+func _SLPSSetFrontProcessWithOptions(_ psn: inout ProcessSerialNumber, _ wid: CGWindowID, _ mode: SLPSMode.RawValue) -> CGError

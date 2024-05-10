@@ -50,7 +50,7 @@ func getCurrentTimestampInMilliseconds() -> Int64 {
 
 func retry(f: () throws -> Void, times: UInt8 = 3) {
     if times <= 0 {
-        warn("retry timeout");
+        debug("retry timeout");
         return
     }
     let interval: Double = 0.5
