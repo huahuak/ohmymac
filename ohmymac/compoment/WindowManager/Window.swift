@@ -166,7 +166,7 @@ class Window: Equatable {
             window.axWindow.focusWindow()
         }
         if let event = NSApp.currentEvent {
-            if event.modifierFlags.contains(.shift) {
+            if event.modifierFlags.contains(.option) {
                 close()
                 return
             }

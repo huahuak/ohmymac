@@ -16,16 +16,16 @@
 
   **Basic Rule**
 
-  | Condition                                   | Action                                                       | Done |
-  | :------------------------------------------ | :----------------------------------------------------------- | :--: |
-  | When window unhide/activate                 | append applicatoin icon to menubar.                          |  ✅   |
-  | When window hide/close                      | remove application icon from menubar.                        |  ✅   |
-  | When click application icon on menubar      | switch to last activated window.                             |  ✅   |
-  | When press `Cmd+Tab`                        | switch to last activated window.                             |  ✅   |
-  | When click applition icon with flag `Shift` | close the last activated window of the being clicked application. |  ✅   |
+  | Condition                                 | Action                                                       | Done |
+  | :---------------------------------------- | :----------------------------------------------------------- | :--: |
+  | When window unhide/activate               | append applicatoin icon to menubar.                          |  ✅   |
+  | When window hide/close                    | remove application icon from menubar.                        |  ✅   |
+  | When click application icon on menubar    | switch to last activated window.                             |  ✅   |
+  | When press `Cmd+Tab`                      | switch to last activated window.                             |  ✅   |
+  | When click applition icon with flag `Opt` | close the last activated window of the being clicked application. |  ✅   |
 
 - How to work with the window features of ohmymac?
-  1. Just use StageManager/Dock to find your **target** application and window, but use ohmymac to find your **the most recent activated window**.
+  1. Just use StageManager/Mission-Control/Dock to find your **target** application and window, but use ohmymac to find your **the most recent activated window**.
   2. FullScreen: You can set menubar always show,  So you can use ohmymac to find window quicklly. (without Mission Control or dock)
 
 #### Description
