@@ -106,6 +106,10 @@ class Window: Equatable {
         axWindow.minimize()
     }
     
+    func close() {
+        _ = axWindow.close()
+    }
+    
     // ------------------------------------ //
     // MARK: for button
     // ----------------------------------- //
@@ -162,8 +166,8 @@ class Window: Equatable {
             window.axWindow.focusWindow()
         }
         if let event = NSApp.currentEvent {
-            if event.modifierFlags.contains(.option) {
-                minimize()
+            if event.modifierFlags.contains(.shift) {
+                close()
                 return
             }
             doActivateWindow()

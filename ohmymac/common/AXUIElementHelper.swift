@@ -68,6 +68,14 @@ extension AXUIElement {
         return result == .success
     }
     
+    func close() -> Bool {
+        if let closeButton: AXUIElement = get(str: kAXCloseButtonAttribute) {
+            AXUIElementPerformAction(closeButton, kAXPressAction as CFString)
+            return true
+        }
+        return false
+    }
+    
     func focusWindow() {
         AXUIElementPerformAction(self, kAXRaiseAction as CFString)
     }
