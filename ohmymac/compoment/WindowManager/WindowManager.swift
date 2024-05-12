@@ -85,7 +85,7 @@ class WindowManager {
     // ------------------------------------ //
     // MARK: notification
     // ----------------------------------- //
-    static func notifyWindowActivate(_ cond: WindowCond) {
+    static func notifyWindowActivated(_ cond: WindowCond) {
         guard let windowManager = windowManager else { return }
         guard let window = windowManager.findWindow(cond) else { return }
         guard let _ = window.app else { return }
@@ -95,7 +95,7 @@ class WindowManager {
             var axWindows: [AXUIElement]?
             retry(f: {
                 axWindows = try WindowManager.getAllWindow(app.axApp)
-            }, times: 1)
+            })
             if axWindows == nil {
                 windowManager.applications.removeAll(where: app.cond)
             }

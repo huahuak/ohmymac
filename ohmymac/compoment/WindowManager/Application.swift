@@ -52,6 +52,9 @@ class Application {
         }
     }
     
+    /// appendWindow will add window to application only when it is not exist.
+    /// then refresh application icon in menubar.
+    /// finally, notify WindowManager something happen.
     func appendWindow(_ window: Window) {
         if windows.contains(where: window.cond) {
             warn("Application.appendWindow(): window exist!")
@@ -63,6 +66,8 @@ class Application {
         }
         lastWindow = window
         menu.show(window.btn)
+        // notify WindowManager
+        WindowManager.notifyWindowActivated(window.cond)
     }
     
     /// remove all window ref in the application, then remove from menubar automatically.
@@ -80,7 +85,7 @@ class Application {
     }
     
     /// remove last window btn, then add new window into menubar
-    func notifyWindowDeminimized(_ cond: WindowCond) throws {
+    func notifyWindowActivated(_ cond: WindowCond) throws {
         guard let window = findWindow(cond) else { throw ErrCode() }
         removeWindow(window.cond)
         appendWindow(window)
@@ -137,13 +142,10 @@ class Application {
                 guard let window = Window(app: self, axWindow: axw) else { return }
                 appendWindow(window)
             }
-        }
-        // axWindow is nil, just try refresh
-        if let last = lastWindow {
+        } else if let last = lastWindow { // axWindow is nil, just try refresh
             removeWindow(last.cond)
             appendWindow(last)
         }
-        
     }
 
 }

@@ -23,7 +23,6 @@ class Window: Equatable {
     let nsApp: NSRunningApplication
     var windowID: CGWindowID
     var status: WindowStatus = .none
-    var isPinned: Bool
     var deinitCallback: [Fn] = []
     
     init?(app: Application, axWindow: AXUIElement) {
@@ -42,8 +41,6 @@ class Window: Equatable {
         }
         self.windowID = windowID
         
-        self.isPinned = false
-        
         registerObserver()
         info("application {\(nsApp.localizedName!)} append window is {\(axWindow.windowTitle()!)} ✅")
         main.async { self.updateStatus() } // delay update status
@@ -53,7 +50,7 @@ class Window: Equatable {
         deinitCallback.forEach{ $0() }
     }
     
-    func registerObserver() {
+    private func registerObserver() {
         func registerHelper(_ notifications: String..., doing: @escaping (Application, Window) -> Void) {
             let escapeFn = EscapeObserverExecutor { [weak self] axui in
                 guard let window = self else { warn("Window.registerObserver(): window has been removed!"); return }
@@ -77,12 +74,18 @@ class Window: Equatable {
         }
     }
     
-    func updateStatus() {
-        let old = status
+    // MARK: Window Action
+    func minimize() {
+        axWindow.minimize()
+    }
+    
+    func close() {
+        _ = axWindow.close()
+    }
+    
+    // Private Function
+    private func updateStatus() {
         status = Window.getStatus(axWindow: axWindow)
-//        if old == status {
-//            return
-//        }
         switch status {
         case .none:
             return
@@ -93,32 +96,24 @@ class Window: Equatable {
         }
     }
     
-    func addToMenu() {
+    private func addToMenu() {
         do {
-            try app?.notifyWindowDeminimized(cond)
+            try app?.notifyWindowActivated(cond)
         } catch {
             warn("delay update failed!")
             menu.show(btn)
         }
     }
     
-    func minimize() {
-        axWindow.minimize()
-    }
-    
-    func close() {
-        _ = axWindow.close()
-    }
-    
     // ------------------------------------ //
     // MARK: for button
     // ----------------------------------- //
-    lazy var baseIcon = {
+    private lazy var baseIcon = {
         let img = nsApp.icon
         img?.size = NSSize(width: 22, height: 22)
         return img ?? randomIcon()
     }()
-    static let pinIcon = {
+    private static let pinIcon = {
         let pin = NSImage(systemSymbolName: "pin.fill", accessibilityDescription: nil)!
         pin.size = NSSize(width: 9, height: 9)
         return pin
@@ -135,7 +130,7 @@ class Window: Equatable {
     }()
     
     /// The following function was ported from https://github.com/Hammerspoon/hammerspoon/issues/370#issuecomment-545545468
-    func makeKeyWindow(_ psn: ProcessSerialNumber) -> Void {
+    private func makeKeyWindow(_ psn: ProcessSerialNumber) -> Void {
         var psn_ = psn
         var bytes1 = [UInt8](repeating: 0, count: 0xf8)
         bytes1[0x04] = 0xF8
@@ -166,6 +161,10 @@ class Window: Equatable {
             window.axWindow.focusWindow()
         }
         if let event = NSApp.currentEvent {
+            if event.modifierFlags.contains(.command) { // only do switch when cmd+tab
+                doActivateWindow()
+                return
+            }
             if event.modifierFlags.contains(.option) {
                 close()
                 return
