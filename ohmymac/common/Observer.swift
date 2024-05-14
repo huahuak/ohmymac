@@ -14,7 +14,7 @@ private var AXObserverHolder: [AXObserver] = []
 typealias ObserverHandlerFn = (AXUIElement) -> Void
 
 class EscapeObserverExecutor {
-    let fn: ObserverHandlerFn
+    let fn: ObserverHandlerFn?
     
     init(fn: @escaping ObserverHandlerFn) {
         self.fn = fn
@@ -54,19 +54,25 @@ class Observer {
                      notificationName: CFString,
                      ptr: UnsafeMutableRawPointer?) -> Void  {
             debug("AX Notification: \(notificationName)")
-            let executor = Unmanaged<EscapeObserverExecutor>.fromOpaque(ptr!).takeUnretainedValue()
-            executor.fn(element)
+            guard let ptr = ptr else { return }
+            let executor = Unmanaged<EscapeObserverExecutor>.fromOpaque(ptr).takeUnretainedValue()
+            guard let fn = executor.fn else {
+                warn("Observer.add(): fn is nil")
+                notify(msg: "Observer.add(): fn is nil")
+                return
+            }
+            fn(element)
         }
         
         var axObserver: AXObserver? = nil
         if AXObserverCreate(pid, handler, &axObserver) != .success {
-            warn("Observer.addAX(): create failed!"); return {}
+            warn("Observer.add(): create failed!"); return {}
         }
         notifications.forEach {
             if AXObserverAddNotification(axObserver!,
                                          axui, $0 as CFString,
                                          fnPtr.toOpaque()) != .success {
-                warn("Observer.addAX(): add failed!");
+                warn("Observer.add(): add failed!");
             }
         }
         main.async {
@@ -76,12 +82,12 @@ class Observer {
         }
 
         let deinitCallback = {
-//            notifications.forEach {
-//                let result = AXObserverRemoveNotification(axObserver!, axui, $0 as CFString)
-//                if  result != .success {
-//                    warn("Observer.addAX(): remove failed! result is \(result.rawValue)")
-//                }
-//            }
+            notifications.forEach {
+                let result = AXObserverRemoveNotification(axObserver!, axui, $0 as CFString)
+                if  result != .success {
+                    warn("Observer.addAX(): remove failed! result is \(result.rawValue)")
+                }
+            }
             main.async {
                 CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(),
                                       AXObserverGetRunLoopSource(axObserver!),

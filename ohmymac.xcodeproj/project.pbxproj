@@ -23,8 +23,8 @@
 		475247A82B96DDF70084460B /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479E2B96DDF70084460B /* WebView.swift */; };
 		475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A12B96DDF70084460B /* GoogleSearch.swift */; };
 		475247AC2B96DDF70084460B /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A32B96DDF70084460B /* Translate.swift */; };
-		476A3EF42BEA469F006F5E9D /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 476A3EF32BEA469F006F5E9D /* Atomics */; };
-		476A3EF72BEA46A4006F5E9D /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 476A3EF62BEA46A4006F5E9D /* HotKey */; };
+		47664E512BF39B2E00F2BD79 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 47664E502BF39B2E00F2BD79 /* HotKey */; };
+		47664E542BF39B3400F2BD79 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 47664E532BF39B3400F2BD79 /* Atomics */; };
 		478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C91682BBC3DA60031E95C /* Hotkey.swift */; };
 		47A2C4332BBF459600F972F8 /* Window.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4322BBF459600F972F8 /* Window.swift */; };
 		47A2C4352BBF478300F972F8 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4342BBF478300F972F8 /* Application.swift */; };
@@ -78,9 +78,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47664E542BF39B3400F2BD79 /* Atomics in Frameworks */,
+				47664E512BF39B2E00F2BD79 /* HotKey in Frameworks */,
 				4710CFE72BEE983200751AEC /* SkyLight.framework in Frameworks */,
-				476A3EF72BEA46A4006F5E9D /* HotKey in Frameworks */,
-				476A3EF42BEA469F006F5E9D /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,8 +230,8 @@
 			);
 			name = ohmymac;
 			packageProductDependencies = (
-				476A3EF32BEA469F006F5E9D /* Atomics */,
-				476A3EF62BEA46A4006F5E9D /* HotKey */,
+				47664E502BF39B2E00F2BD79 /* HotKey */,
+				47664E532BF39B3400F2BD79 /* Atomics */,
 			);
 			productName = "awesome-mac";
 			productReference = 475247692B96DA030084460B /* ohmymac.app */;
@@ -263,8 +263,8 @@
 			);
 			mainGroup = 475247602B96DA030084460B;
 			packageReferences = (
-				476A3EF22BEA469F006F5E9D /* XCRemoteSwiftPackageReference "swift-atomics" */,
-				476A3EF52BEA46A4006F5E9D /* XCRemoteSwiftPackageReference "HotKey" */,
+				47664E4F2BF39B2E00F2BD79 /* XCRemoteSwiftPackageReference "HotKey" */,
+				47664E522BF39B3400F2BD79 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 			);
 			productRefGroup = 4752476A2B96DA030084460B /* Products */;
 			projectDirPath = "";
@@ -541,15 +541,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		476A3EF22BEA469F006F5E9D /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-atomics.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.0;
-			};
-		};
-		476A3EF52BEA46A4006F5E9D /* XCRemoteSwiftPackageReference "HotKey" */ = {
+		47664E4F2BF39B2E00F2BD79 /* XCRemoteSwiftPackageReference "HotKey" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/soffes/HotKey";
 			requirement = {
@@ -557,18 +549,26 @@
 				kind = branch;
 			};
 		};
+		47664E522BF39B3400F2BD79 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-atomics.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		476A3EF32BEA469F006F5E9D /* Atomics */ = {
+		47664E502BF39B2E00F2BD79 /* HotKey */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 476A3EF22BEA469F006F5E9D /* XCRemoteSwiftPackageReference "swift-atomics" */;
-			productName = Atomics;
-		};
-		476A3EF62BEA46A4006F5E9D /* HotKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 476A3EF52BEA46A4006F5E9D /* XCRemoteSwiftPackageReference "HotKey" */;
+			package = 47664E4F2BF39B2E00F2BD79 /* XCRemoteSwiftPackageReference "HotKey" */;
 			productName = HotKey;
+		};
+		47664E532BF39B3400F2BD79 /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 47664E522BF39B3400F2BD79 /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
