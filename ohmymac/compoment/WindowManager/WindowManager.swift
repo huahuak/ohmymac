@@ -151,31 +151,37 @@ class WindowSwitchShortcut {
     var cnt = 1
     var eventTap: CFMachPort?
     
-    static func get (_ idx: Int) -> NSButton {
+    static func get (_ idx: Int) -> NSButton? {
+        if menu.view.subviews.isEmpty { return nil }
         let reverse = menu.view.subviews.count - 1 - (idx % menu.view.subviews.count)
-        return menu.view.arrangedSubviews[reverse] as! NSButton
+        return menu.view.arrangedSubviews[reverse] as? NSButton
     }
     let start:() -> Void =  {
         menu.showAll()
         main.async {
             Thread.sleep(forTimeInterval: 0.1)
-            animate(shakeButton: get(1))
+            if let btn = get(1) {
+                animate(shakeButton: btn)
+            }
         }
-        get(1).highlight(true)
+        get(1)?.highlight(true)
     }
     let next: (_ idx: Int)->Void =  {idx in
-        get(idx - 1).highlight(false)
-        get(idx).highlight(true)
-        animate(shakeButton: get(idx))
+        get(idx - 1)?.highlight(false)
+        if let selected = get(idx) {
+            selected.highlight(true)
+            animate(shakeButton: selected)
+        }
     }
     let end: (_ idx: Int) -> Void =  { idx in
-        get(idx - 1).highlight(false)
-        get(idx).highlight(false)
-        let windowBtn = get(idx)
-        if let window = windowBtn.target as? Window {
-            main.async {
-                Thread.sleep(forTimeInterval: 0.2)
-                window.focus()
+        get(idx - 1)?.highlight(false)
+        if let selected = get(idx) {
+            selected.highlight(true)
+            if let window = selected.target as? Window {
+                main.async {
+                    Thread.sleep(forTimeInterval: 0.2)
+                    window.focus()
+                }
             }
         }
     }
