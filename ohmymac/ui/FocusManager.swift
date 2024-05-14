@@ -41,10 +41,12 @@ class FocusManager: NSWindowController, NSWindowDelegate {
         showWindow(nil)
         main.async {
             Thread.sleep(forTimeInterval: 0.1)
-            let ok = NSRunningApplication.current.activate(options: [.activateAllWindows])
-            if !ok {
-                debugPrint("get focused failed")
-                self.window?.close()
+            retry {
+                let ok = NSRunningApplication.current.activate(options: [.activateAllWindows])
+                if !ok {
+                    debugPrint("get focused failed")
+                    self.window?.close()
+                }
             }
         }
     }
