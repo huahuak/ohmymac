@@ -83,6 +83,36 @@ class Window: Equatable {
         _ = axWindow.close()
     }
     
+    func focus() {
+        /// The following function was ported from 
+        /// https://github.com/Hammerspoon/hammerspoon/issues/370#issuecomment-545545468
+        func makeKeyWindow(_ psn: ProcessSerialNumber) -> Void {
+            var psn_ = psn
+            var bytes1 = [UInt8](repeating: 0, count: 0xf8)
+            bytes1[0x04] = 0xF8
+            bytes1[0x08] = 0x01
+            bytes1[0x3a] = 0x10
+            var bytes2 = [UInt8](repeating: 0, count: 0xf8)
+            bytes2[0x04] = 0xF8
+            bytes2[0x08] = 0x02
+            bytes2[0x3a] = 0x10
+            memcpy(&bytes1[0x3c], &windowID, MemoryLayout<UInt32>.size)
+            memset(&bytes1[0x20], 0xFF, 0x10)
+            memcpy(&bytes2[0x3c], &windowID, MemoryLayout<UInt32>.size)
+            memset(&bytes2[0x20], 0xFF, 0x10)
+            [bytes1, bytes2].forEach { bytes in
+                _ = bytes.withUnsafeBufferPointer() { pointer in
+                    SLPSPostEventRecordTo(&psn_, &UnsafeMutablePointer(mutating: pointer.baseAddress)!.pointee)
+                }
+            }
+        }
+        var psn = ProcessSerialNumber()
+        GetProcessForPID(nsApp.processIdentifier, &psn)
+        _SLPSSetFrontProcessWithOptions(&psn, windowID, SLPSMode.userGenerated.rawValue)
+        makeKeyWindow(psn)
+        axWindow.focusWindow()
+    }
+    
     // Private Function
     private func updateStatus() {
         status = Window.getStatus(axWindow: axWindow)
@@ -128,48 +158,15 @@ class Window: Equatable {
         }
         return btn
     }()
-    
-    /// The following function was ported from https://github.com/Hammerspoon/hammerspoon/issues/370#issuecomment-545545468
-    private func makeKeyWindow(_ psn: ProcessSerialNumber) -> Void {
-        var psn_ = psn
-        var bytes1 = [UInt8](repeating: 0, count: 0xf8)
-        bytes1[0x04] = 0xF8
-        bytes1[0x08] = 0x01
-        bytes1[0x3a] = 0x10
-        var bytes2 = [UInt8](repeating: 0, count: 0xf8)
-        bytes2[0x04] = 0xF8
-        bytes2[0x08] = 0x02
-        bytes2[0x3a] = 0x10
-        memcpy(&bytes1[0x3c], &windowID, MemoryLayout<UInt32>.size)
-        memset(&bytes1[0x20], 0xFF, 0x10)
-        memcpy(&bytes2[0x3c], &windowID, MemoryLayout<UInt32>.size)
-        memset(&bytes2[0x20], 0xFF, 0x10)
-        [bytes1, bytes2].forEach { bytes in
-            _ = bytes.withUnsafeBufferPointer() { pointer in
-                SLPSPostEventRecordTo(&psn_, &UnsafeMutablePointer(mutating: pointer.baseAddress)!.pointee)
-            }
-        }
-    }
+
     
     @objc func clickAction(_ sender: NSButton) {
-        let doActivateWindow = {
-            let window = sender.target as! Window
-            var psn = ProcessSerialNumber()
-            GetProcessForPID(window.nsApp.processIdentifier, &psn)
-            _SLPSSetFrontProcessWithOptions(&psn, window.windowID, SLPSMode.userGenerated.rawValue)
-            window.makeKeyWindow(psn)
-            window.axWindow.focusWindow()
-        }
         if let event = NSApp.currentEvent {
-            if event.modifierFlags.contains(.command) { // only do switch when cmd+tab
-                doActivateWindow()
-                return
-            }
             if event.modifierFlags.contains(.option) {
                 close()
                 return
             }
-            doActivateWindow()
+            focus()
         }
     }
     

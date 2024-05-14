@@ -32,7 +32,6 @@ class WindowManager {
     init() {
         let initApplicationFunc = { [self] (nsapp: NSRunningApplication) in
             if nsapp.localizedName == "ohmymac" { return }
-            if nsapp.localizedName == "Finder" { return }
             if applications.contains(where: { nsapp.processIdentifier == $0.nsApp.processIdentifier }) {
                 return
             }
@@ -91,15 +90,15 @@ class WindowManager {
         guard let _ = window.app else { return }
         
         // check window
-        windowManager.applications.forEach { app in
-            var axWindows: [AXUIElement]?
-            retry(f: {
-                axWindows = try WindowManager.getAllWindow(app.axApp)
-            })
-            if axWindows == nil {
-                windowManager.applications.removeAll(where: app.cond)
-            }
-        }
+//        windowManager.applications.forEach { app in
+//            var axWindows: [AXUIElement]?
+//            retry(f: {
+//                axWindows = try WindowManager.getAllWindow(app.axApp)
+//            })
+//            if axWindows == nil {
+//                windowManager.applications.removeAll(where: app.cond)
+//            }
+//        }
     }
     
     
@@ -161,15 +160,40 @@ class WindowSwitchShortcut {
     }
     let start:() -> Void =  {
         menu.showAll()
+        main.async {
+            Thread.sleep(forTimeInterval: 0.1)
+            animate(shakeButton: get(1))
+        }
         get(1).highlight(true)
     }
     let next: (_ idx: Int)->Void =  {idx in
         get(idx - 1).highlight(false)
         get(idx).highlight(true)
+        animate(shakeButton: get(idx))
     }
     let end: (_ idx: Int) -> Void =  { idx in
         get(idx - 1).highlight(false)
-        get(idx).performClick(get(idx))
+        get(idx).highlight(false)
+        let windowBtn = get(idx)
+        if let window = windowBtn.target as? Window {
+            main.async {
+                Thread.sleep(forTimeInterval: 0.15)
+                window.focus()
+            }
+        }
+    }
+    
+    private static func animate(shakeButton: NSButton) {
+        shakeButton.layer?.removeAllAnimations()
+        let shakeAnimation = CABasicAnimation(keyPath: "position")
+        shakeAnimation.duration = 0.07
+        shakeAnimation.repeatCount = 2
+        shakeAnimation.autoreverses = true
+        let fromPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y + 2)
+        let toPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y - 2)
+        shakeAnimation.fromValue = NSValue(point: fromPoint)
+        shakeAnimation.toValue = NSValue(point: toPoint)
+        shakeButton.layer?.add(shakeAnimation, forKey: "position")
     }
     
     static func startCGEvent(wss: inout WindowSwitchShortcut) {

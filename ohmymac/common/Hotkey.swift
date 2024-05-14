@@ -17,7 +17,7 @@ class Hotkey {
     init() {}
     
     func doubleTrigger(modifiers: NSEvent.ModifierFlags, handler: @escaping Fn) {
-        if let monitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: { [self] event in
+        let fn: (NSEvent) -> Void = { [self] event in
             if !event.modifierFlags.contains(modifiers) { return }
             for flag in allFlags.filter({ $0 != modifiers }) {
                 if event.modifierFlags.contains(flag) {
@@ -30,7 +30,8 @@ class Hotkey {
                 main.async { handler() }
             }
             triggerTime = now
-        }) {
+        }
+        if let monitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged, handler: fn) {
             deInitFunc.append {
                 NSEvent.removeMonitor(monitor)
             }
