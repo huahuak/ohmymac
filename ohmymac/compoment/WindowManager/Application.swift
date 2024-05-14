@@ -106,12 +106,13 @@ class Application {
     func notifyWindowMinimized(_ cond: WindowCond) {
         guard let window = findWindow(cond) else { return }
         removeWindow(cond)
-        windows.insert(window, at: 0) // move to minimized window head.
         
         if let last = windows.last {
             lastWindow = last
             menu.show(last.btn)
         }
+        
+        windows.insert(window, at: 0) // move minimized window to windows head.
     }
     
     

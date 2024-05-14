@@ -90,15 +90,12 @@ class WindowManager {
         guard let _ = window.app else { return }
         
         // check window
-//        windowManager.applications.forEach { app in
-//            var axWindows: [AXUIElement]?
-//            retry(f: {
-//                axWindows = try WindowManager.getAllWindow(app.axApp)
-//            })
-//            if axWindows == nil {
-//                windowManager.applications.removeAll(where: app.cond)
-//            }
-//        }
+        if let windowDead = windowManager.findWindow({
+            $0.axWindow.windowTitle() == nil
+        }) {
+            windowDead.app?.notifyWindowClosed(windowDead.cond)
+        }
+        
     }
     
     
@@ -177,7 +174,7 @@ class WindowSwitchShortcut {
         let windowBtn = get(idx)
         if let window = windowBtn.target as? Window {
             main.async {
-                Thread.sleep(forTimeInterval: 0.15)
+                Thread.sleep(forTimeInterval: 0.2)
                 window.focus()
             }
         }
