@@ -176,12 +176,9 @@ class WindowSwitchShortcut {
     let end: (_ idx: Int) -> Void =  { idx in
         get(idx - 1)?.highlight(false)
         if let selected = get(idx) {
-            selected.highlight(true)
+            selected.highlight(false)
             if let window = selected.target as? Window {
-                main.async {
-                    Thread.sleep(forTimeInterval: 0.2)
-                    window.focus()
-                }
+                window.focus()
             }
         }
     }
@@ -189,8 +186,8 @@ class WindowSwitchShortcut {
     private static func animate(shakeButton: NSButton) {
         shakeButton.layer?.removeAllAnimations()
         let shakeAnimation = CABasicAnimation(keyPath: "position")
-        shakeAnimation.duration = 0.07
-        shakeAnimation.repeatCount = 2
+        shakeAnimation.duration = 0.05
+        shakeAnimation.repeatCount = 1
         shakeAnimation.autoreverses = true
         let fromPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y + 2)
         let toPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y - 2)

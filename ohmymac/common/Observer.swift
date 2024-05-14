@@ -57,6 +57,7 @@ class Observer {
             guard let ptr = ptr else { return }
             let executor = Unmanaged<EscapeObserverExecutor>.fromOpaque(ptr).takeUnretainedValue()
             guard let fn = executor.fn else {
+                // debug coding
                 warn("Observer.add(): fn is nil")
                 notify(msg: "Observer.add(): fn is nil")
                 return
@@ -75,25 +76,25 @@ class Observer {
                 warn("Observer.add(): add failed!");
             }
         }
-        main.async {
+        
+        main.async { // TODO: move runloop to background thread, to improve performance.
             CFRunLoopAddSource(RunLoop.current.getCFRunLoop(),
                                AXObserverGetRunLoopSource(axObserver!),
                                CFRunLoopMode.defaultMode)
         }
 
         let deinitCallback = {
-            notifications.forEach {
-                let result = AXObserverRemoveNotification(axObserver!, axui, $0 as CFString)
-                if  result != .success {
-                    warn("Observer.addAX(): remove failed! result is \(result.rawValue)")
-                }
-            }
-            main.async {
-                CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(),
-                                      AXObserverGetRunLoopSource(axObserver!),
-                                      CFRunLoopMode.defaultMode)
-                axObserver = nil
-            }
+//            // for now we don't call release by self.
+//            notifications.forEach {
+//                let result = AXObserverRemoveNotification(axObserver!, axui, $0 as CFString)
+//                if  result != .success {
+//                    warn("Observer.add(): remove failed! result is \(result.rawValue)")
+//                }
+//            }
+//            CFRunLoopRemoveSource(RunLoop.current.getCFRunLoop(),
+//                                  AXObserverGetRunLoopSource(axObserver!),
+//                                  CFRunLoopMode.defaultMode)
+            axObserver = nil
             fnPtr.release()
         }  // deinit by caller
         return deinitCallback
