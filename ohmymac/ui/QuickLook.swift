@@ -60,6 +60,17 @@ fileprivate let fm = {
         if !lock.unlock() { debugPrint("ql unlock failed!"); return }
     }
     
+    Observer.addGlobally(notice: NSWorkspace.didDeactivateApplicationNotification) { notice in
+        guard let nsapp = notice.userInfo?[NSWorkspace.applicationUserInfoKey]
+                as? NSRunningApplication else { return }
+        if nsapp.localizedName == "ohmymac" {
+            if let panel = QLPreviewPanel.shared() {
+                panel.close()
+            }
+            fm.recoverFocused()
+        }
+    }
+    
     Observer.addLocally(notice: NSWindow.willCloseNotification) { notice in
         if notice.object is NSWindow,
            notice.object as? NSWindow == QLPreviewPanel.shared() {
