@@ -22,7 +22,8 @@ func openQuickLook(file: URL) {
     if let panel = QLPreviewPanel.shared() {
         fm.getFocused()
         panel.dataSource = ql
-        panel.makeKeyAndOrderFront(nil)
+        panel.delegate = ql
+        panel.makeKeyAndOrderFront(fm)
     }
 }
 
@@ -31,9 +32,23 @@ func qlMessage(msg: String) {
 }
 
 
-fileprivate class QuickLook: QLPreviewPanelDataSource {
+fileprivate class QuickLook: NSViewController, QLPreviewPanelDelegate, QLPreviewPanelDataSource {
     
     var url: URL?
+    var sharedPanel:QLPreviewPanel? = nil
+    
+    override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+        return true
+    }
+    
+    override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        sharedPanel = panel
+        
+    }
+    
+    override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        sharedPanel = nil
+    }
     
     func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
         return 1
@@ -58,15 +73,15 @@ fileprivate let fm = {
     
     fm.addCallback {
         if !lock.unlock() { debugPrint("ql unlock failed!"); return }
+        if let panel = QLPreviewPanel.shared() {
+            panel.close()
+        }
     }
     
     Observer.addGlobally(notice: NSWorkspace.didDeactivateApplicationNotification) { notice in
         guard let nsapp = notice.userInfo?[NSWorkspace.applicationUserInfoKey]
                 as? NSRunningApplication else { return }
         if nsapp.localizedName == "ohmymac" {
-            if let panel = QLPreviewPanel.shared() {
-                panel.close()
-            }
             fm.recoverFocused()
         }
     }

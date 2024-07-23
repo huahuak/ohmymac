@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		471F0C682BB9505500E00259 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C672BB9505500E00259 /* WindowManager.swift */; };
 		471F0C6A2BB976AC00E00259 /* AXUIElementHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */; };
-		471F547A2C49944700E9A2D2 /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4710CFE62BEE983200751AEC /* SkyLight.framework */; };
 		473715322BA21245003275F2 /* SelectText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473715312BA21245003275F2 /* SelectText.swift */; };
 		4752478D2B96DC860084460B /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247872B96DC860084460B /* Menu.swift */; };
 		4752478E2B96DC860084460B /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247882B96DC860084460B /* Common.swift */; };
@@ -32,6 +31,7 @@
 		47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A8BCD52BBB23BE00DCDA3C /* Image.swift */; };
 		47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D14D5E2BBDBFF200198C1C /* Concurrent.swift */; };
 		47E3970B2BBC816800E22718 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E3970A2BBC816800E22718 /* Logger.swift */; };
+		47EF14912C5073D300E83209 /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4710CFE62BEE983200751AEC /* SkyLight.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,7 +39,6 @@
 		471F0C672BB9505500E00259 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXUIElementHelper.swift; sourceTree = "<group>"; };
 		473715312BA21245003275F2 /* SelectText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectText.swift; sourceTree = "<group>"; };
-		473E71232C49927900B0EEC3 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = ../../../../System/Library/Frameworks/Network.framework; sourceTree = "<group>"; };
 		475247692B96DA030084460B /* ohmymac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ohmymac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475247862B96DC860084460B /* ohmymac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ohmymac-Bridging-Header.h"; sourceTree = "<group>"; };
 		475247872B96DC860084460B /* Menu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
@@ -62,6 +61,7 @@
 		47C9DEB12BBAB266002189C6 /* ohmymac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ohmymac.entitlements; sourceTree = "<group>"; };
 		47D14D5E2BBDBFF200198C1C /* Concurrent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Concurrent.swift; sourceTree = "<group>"; };
 		47E3970A2BBC816800E22718 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		47EF14902C5070BF00E83209 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,7 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				471F547A2C49944700E9A2D2 /* SkyLight.framework in Frameworks */,
+				47EF14912C5073D300E83209 /* SkyLight.framework in Frameworks */,
 				47664E542BF39B3400F2BD79 /* Atomics in Frameworks */,
 				47664E512BF39B2E00F2BD79 /* HotKey in Frameworks */,
 			);
@@ -81,7 +81,6 @@
 		4710CFE52BEE983100751AEC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				473E71232C49927900B0EEC3 /* Network.framework */,
 				4710CFE62BEE983200751AEC /* SkyLight.framework */,
 			);
 			name = Frameworks;
@@ -107,6 +106,7 @@
 		4752476B2B96DA030084460B /* ohmymac */ = {
 			isa = PBXGroup;
 			children = (
+				47EF14902C5070BF00E83209 /* Info.plist */,
 				47C9DEB12BBAB266002189C6 /* ohmymac.entitlements */,
 				475247862B96DC860084460B /* ohmymac-Bridging-Header.h */,
 				4752478C2B96DC860084460B /* AppDelegate.swift */,
@@ -207,7 +207,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1530;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					475247682B96DA030084460B = {
 						CreatedOnToolsVersion = 15.0;
@@ -415,8 +415,10 @@
 				CURRENT_PROJECT_VERSION = 31;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
+				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = ohmymac/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -434,10 +436,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "ohmymac/ohmymac-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					/System/Library/PrivateFrameworks,
-				);
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = /System/Library/PrivateFrameworks;
 				SYSTEM_HEADER_SEARCH_PATHS = "";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -458,8 +457,10 @@
 				CURRENT_PROJECT_VERSION = 31;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5UK2N84UR3;
+				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = ohmymac/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -475,11 +476,9 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "ohmymac/ohmymac-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					/System/Library/PrivateFrameworks,
-				);
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = /System/Library/PrivateFrameworks;
 				SYSTEM_HEADER_SEARCH_PATHS = "";
 				USER_HEADER_SEARCH_PATHS = "";
 			};

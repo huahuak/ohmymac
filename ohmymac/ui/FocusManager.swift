@@ -38,19 +38,12 @@ class FocusManager: NSWindowController, NSWindowDelegate {
             self?.defocused = nil
         }
 
-        showWindow(nil)
-        main.async {
-            Thread.sleep(forTimeInterval: 0.1)
-            retry {
-                let ok = NSRunningApplication.current.activate(options: [.activateAllWindows])
-                if !ok {
-                    debugPrint("get focused failed")
-                    self.window?.close()
-                }
-            }
-        }
+        self.window?.makeKeyAndOrderFront(self)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
+    /// `recoverFocused` will close window,
+    /// and `windowWillClose` will be executed.
     func recoverFocused() {
         window?.close()
     }
