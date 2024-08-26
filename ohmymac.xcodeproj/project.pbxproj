@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		471D00A52C7CC518002639D1 /* ChangeInputSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471D00A42C7CC518002639D1 /* ChangeInputSource.swift */; };
+		471D00A62C7CD05E002639D1 /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4710CFE62BEE983200751AEC /* SkyLight.framework */; };
 		471F0C682BB9505500E00259 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C672BB9505500E00259 /* WindowManager.swift */; };
 		471F0C6A2BB976AC00E00259 /* AXUIElementHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */; };
 		473715322BA21245003275F2 /* SelectText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473715312BA21245003275F2 /* SelectText.swift */; };
@@ -31,11 +33,11 @@
 		47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A8BCD52BBB23BE00DCDA3C /* Image.swift */; };
 		47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D14D5E2BBDBFF200198C1C /* Concurrent.swift */; };
 		47E3970B2BBC816800E22718 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E3970A2BBC816800E22718 /* Logger.swift */; };
-		47EF14912C5073D300E83209 /* SkyLight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4710CFE62BEE983200751AEC /* SkyLight.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		4710CFE62BEE983200751AEC /* SkyLight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SkyLight.framework; path = ../../../../System/Library/PrivateFrameworks/SkyLight.framework; sourceTree = "<group>"; };
+		471D00A42C7CC518002639D1 /* ChangeInputSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeInputSource.swift; sourceTree = "<group>"; };
 		471F0C672BB9505500E00259 /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
 		471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXUIElementHelper.swift; sourceTree = "<group>"; };
 		473715312BA21245003275F2 /* SelectText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectText.swift; sourceTree = "<group>"; };
@@ -69,7 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47EF14912C5073D300E83209 /* SkyLight.framework in Frameworks */,
+				471D00A62C7CD05E002639D1 /* SkyLight.framework in Frameworks */,
 				47664E542BF39B3400F2BD79 /* Atomics in Frameworks */,
 				47664E512BF39B2E00F2BD79 /* HotKey in Frameworks */,
 			);
@@ -137,6 +139,7 @@
 				475247A12B96DDF70084460B /* GoogleSearch.swift */,
 				473715312BA21245003275F2 /* SelectText.swift */,
 				475247A32B96DDF70084460B /* Translate.swift */,
+				471D00A42C7CC518002639D1 /* ChangeInputSource.swift */,
 			);
 			path = function;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */,
 				4752478F2B96DC860084460B /* Shortcut.swift in Sources */,
 				47A2C4352BBF478300F972F8 /* Application.swift in Sources */,
+				471D00A52C7CC518002639D1 /* ChangeInputSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,7 +440,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "ohmymac/ohmymac-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				SYSTEM_FRAMEWORK_SEARCH_PATHS = /System/Library/PrivateFrameworks;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks";
 				SYSTEM_HEADER_SEARCH_PATHS = "";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -478,7 +482,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "ohmymac/ohmymac-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				SYSTEM_FRAMEWORK_SEARCH_PATHS = /System/Library/PrivateFrameworks;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks";
 				SYSTEM_HEADER_SEARCH_PATHS = "";
 				USER_HEADER_SEARCH_PATHS = "";
 			};
