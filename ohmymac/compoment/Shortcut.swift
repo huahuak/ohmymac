@@ -37,10 +37,10 @@ fileprivate func initShortcut() {
         }
         WindowAction.center(front)
     })
+    
     // translate
-    Hotkey().doubleTrigger(modifiers: .option, handler: translate)
-    Hotkey().doubleTrigger(modifiers: .shift, handler: setInputSourceToZh)
-    Hotkey().doubleTrigger(modifiers: .control, handler: setInputSourceToEn)
+    Hotkey().doubleTrigger(keyCode: .shift, modifiers: .option, handler: translate)
+    
     // googleSearch
     add(HotKey(key: .g, modifiers: [.option, .command]), googleSearch)
 }

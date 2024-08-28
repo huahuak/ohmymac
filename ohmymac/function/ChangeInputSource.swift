@@ -8,36 +8,56 @@
 import Foundation
 import Carbon
 
-func switchInputSource(inputSourceID: String) {
-    guard let inputSources = TISCreateInputSourceList(nil, false).takeRetainedValue() as? [TISInputSource] else {
-        debug("Failed to get input sources")
-        return
-    }
-    
-    for inputSource in inputSources {
-        if let sourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
-            let sourceIDString = Unmanaged<CFString>.fromOpaque(sourceID).takeUnretainedValue() as String
-            if sourceIDString == inputSourceID {
-                let status = TISSelectInputSource(inputSource)
-                if status != noErr {
-                    debug("Failed to switch input source")
-                } else {
-                    debug("Successfully switched input source to \(inputSourceID)")
-                }
-                return
-            }
-        }
-    }
-    debug("Input source with ID \(inputSourceID) not found")
-}
+// - BUG: macos will not working sometimes.
+//func switchInputSource(inputSourceID: String) {
+//    guard let inputSources = TISCreateInputSourceList(nil, false).takeRetainedValue() as? [TISInputSource] else {
+//        debug("Failed to get input sources")
+//        return
+//    }
+//    
+//    for inputSource in inputSources {
+//        if let sourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
+//            let sourceIDString = Unmanaged<CFString>.fromOpaque(sourceID).takeUnretainedValue() as String
+//            if sourceIDString == inputSourceID {
+//                _ = TISSelectInputSource(inputSource)
+//                return
+//            }
+//        }
+//    }
+//    debug("Input source with ID \(inputSourceID) not found")
+//}
 
 let doublePinyinSourceID = "com.apple.inputmethod.SCIM.Shuangpin"
 let englishSourceID = "com.apple.keylayout.ABC"
 
+func executeChangeInputSource() {
+    let source = CGEventSource(stateID: .hidSystemState)
+    let keyDownEvent = CGEvent(keyboardEventSource: source, virtualKey: Keycode.space, keyDown: true)
+    let keyUpEvent = CGEvent(keyboardEventSource: source, virtualKey: Keycode.space, keyDown: false)
+    keyDownEvent?.flags = .maskControl
+    keyUpEvent?.flags = .maskControl
+    keyDownEvent?.post(tap: .cghidEventTap)
+    keyUpEvent?.post(tap: .cghidEventTap)
+}
+
+func getCurrentInputSourceString() -> String {
+    if let inputSource = TISCopyCurrentKeyboardInputSource()?.takeUnretainedValue() {
+        if let sourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
+            let sourceIDString = Unmanaged<CFString>.fromOpaque(sourceID).takeUnretainedValue() as String
+            return sourceIDString
+        }
+    }
+    return ""
+}
+
 func setInputSourceToZh() {
-    switchInputSource(inputSourceID: doublePinyinSourceID)
+    if getCurrentInputSourceString() != doublePinyinSourceID {
+        executeChangeInputSource()
+    }
 }
 
 func setInputSourceToEn() {
-    switchInputSource(inputSourceID: englishSourceID)
+    if getCurrentInputSourceString() != englishSourceID {
+        executeChangeInputSource()
+    }
 }
