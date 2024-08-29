@@ -6,7 +6,6 @@
 //
 
 import Cocoa
-import UserNotifications
 
 
 typealias Fn = () -> Void
@@ -24,21 +23,6 @@ class ErrCode: Error {
     static let Err: Int32 = -1
     
     static let RetryErr = ErrCode()
-}
-
-func notify(msg: String) {
-    let content = UNMutableNotificationContent()
-    content.title = "ohmymac"
-    content.body = msg
-    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-    let request = UNNotificationRequest(identifier: "notificationIdentifier", content: content, trigger: trigger)
-    UNUserNotificationCenter.current().add(request) { error in
-        if let error = error {
-            print("Error adding notification request: \(error.localizedDescription)")
-        } else {
-            print("Notification request added successfully")
-        }
-    }
 }
 
 func getCurrentTimestampInMilliseconds() -> Int64 {

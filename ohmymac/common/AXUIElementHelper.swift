@@ -30,7 +30,7 @@ extension AXUIElement {
     }
     
     // ------------------------------------ //
-    // for space
+    // MARK: for space
     // ----------------------------------- //
     static func spaceID() -> Int? {
         if let mainScreen = NSScreen.main,
@@ -68,6 +68,22 @@ extension AXUIElement {
         return result == .success
     }
     
+    @discardableResult
+    func resize(size: CGSize) -> Bool {
+        var sz = size;
+        guard let v = AXValueCreate(AXValueType.cgSize, &sz) else { return false }
+        let result = AXUIElementSetAttributeValue(self, NSAccessibility.Attribute.size.rawValue as CFString, v)
+        return result == .success
+    }
+    
+    @discardableResult
+    func move(point: CGPoint) -> Bool {
+        var p = point
+        guard let v = AXValueCreate(AXValueType.cgPoint, &p) else { return false}
+        let result = AXUIElementSetAttributeValue(self, NSAccessibility.Attribute.position.rawValue as CFString, v)
+        return result == .success
+    }
+    
     func close() -> Bool {
         if let closeButton: AXUIElement = get(str: kAXCloseButtonAttribute) {
             AXUIElementPerformAction(closeButton, kAXPressAction as CFString)
@@ -76,7 +92,7 @@ extension AXUIElement {
         return false
     }
     
-    func focusWindow() {
+    func focus() {
         AXUIElementPerformAction(self, kAXRaiseAction as CFString)
     }
     
@@ -122,18 +138,18 @@ extension AXUIElement {
     }
     
     // ------------------------------------ //
-    // for application
+    // MARK: for application
     // ----------------------------------- //
     
-    func getMainWindow() -> AXUIElement? {
+    func mainWindow() -> AXUIElement? {
         get(attr: .mainWindow)
     }
     
-    func getFocusedWindow() -> AXUIElement? {
+    func focusedWindow() -> AXUIElement? {
         get(attr: .focusedWindow)
     }
     
-    func getAllWindows() -> [AXUIElement]? {
+    func allWindows() -> [AXUIElement]? {
         get(attr: .windows)
     }
 

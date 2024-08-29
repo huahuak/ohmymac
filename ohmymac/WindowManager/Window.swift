@@ -110,7 +110,7 @@ class Window: Equatable {
         GetProcessForPID(nsApp.processIdentifier, &psn)
         _SLPSSetFrontProcessWithOptions(&psn, windowID, SLPSMode.userGenerated.rawValue)
         makeKeyWindow(psn)
-        axWindow.focusWindow()
+        axWindow.focus()
     }
     
     // Private Function

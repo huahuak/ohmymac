@@ -28,7 +28,9 @@ class Hotkey {
             if !event.modifierFlags.contains(modifiers) { triggerTime = 0; return }
             if event.type == .keyDown { triggerTime = 0; return }
             if !event.modifierFlags.contains(keyCode) { return }
-            
+            let otherFlags = allFlags.subtracting([keyCode, modifiers]);
+            if !event.modifierFlags.intersection(otherFlags).isEmpty { triggerTime = 0; return }
+
             let now = event.timestamp
             if now - triggerTime < interval {
                 handler()

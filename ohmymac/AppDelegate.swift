@@ -8,7 +8,7 @@
 import Cocoa
 import Foundation
 import UserNotifications
-
+import IOKit.pwr_mgt
 
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
@@ -17,14 +17,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         requestAccessibilityPermission()
         setupCrashHandler()
-//        startWindowAction()
         startShortcut()
-//        startRecentWindowManger()
         startWindowMenuManager()
+        startScreenTimeReminder(interval: 3600)
         NSApp.setActivationPolicy(.accessory)
         NSApp.activate(ignoringOtherApps: true)
     }
     
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        registryNotificationCenter()
+    }
+    
+    
+    // MARK: function
     func requestAccessibilityPermission() {
         let options = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as String: true]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)

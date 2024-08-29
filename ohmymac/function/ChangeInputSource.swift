@@ -41,11 +41,10 @@ func executeChangeInputSource() {
 }
 
 func getCurrentInputSourceString() -> String {
-    if let inputSource = TISCopyCurrentKeyboardInputSource()?.takeUnretainedValue() {
-        if let sourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
-            let sourceIDString = Unmanaged<CFString>.fromOpaque(sourceID).takeUnretainedValue() as String
-            return sourceIDString
-        }
+    if let inputSource = TISCopyCurrentKeyboardInputSource()?.takeUnretainedValue(),
+       let sourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID){
+        let sourceIDString = Unmanaged<CFString>.fromOpaque(sourceID).takeUnretainedValue() as String
+        return sourceIDString
     }
     return ""
 }

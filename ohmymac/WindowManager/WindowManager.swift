@@ -118,12 +118,12 @@ class WindowManager {
     /// getAllWindow will try find window that is belongs to application
     /// if failed, getAllWindow() will throw RetryErr
     static func getAllWindow(_ axApp: AXUIElement) throws -> [AXUIElement]?  {
-        guard var axWindows = axApp.getAllWindows() else {
+        guard var axWindows = axApp.allWindows() else {
             throw ErrCode.RetryErr
         }
         if axWindows.count == 0 {
-            if let window = axApp.getMainWindow() { axWindows.append(window); return axWindows }
-            if let window = axApp.getFocusedWindow() { axWindows.append(window); return axWindows }
+            if let window = axApp.mainWindow() { axWindows.append(window); return axWindows }
+            if let window = axApp.focusedWindow() { axWindows.append(window); return axWindows }
             if axWindows.count == 0 {
                 throw ErrCode.RetryErr
             }

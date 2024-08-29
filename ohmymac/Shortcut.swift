@@ -32,10 +32,10 @@ fileprivate func initShortcut() {
     add(HotKey(key: .quote, modifiers: [.option]), percentExec(0.9))
     add(HotKey(key: .m, modifiers: [.option]), percentExec(1))
     add(HotKey(key: .c, modifiers: [.option]), {
-        guard let front = WindowAction.getFrontMostWindow() else {
+        guard let front = WindowCommand.getFrontMostWindow() else {
             debugPrint("get front most window failed, can't center window "); return
         }
-        WindowAction.center(front)
+        WindowCommand.center(front)
     })
     
     // translate
@@ -54,9 +54,9 @@ func add(_ hotkey: HotKey, _ handler: @escaping Fn) {
 
 func percentExec(_ width: Double, _ height: Double = 1) -> Fn {
     return {
-        guard let frontMostWindow = WindowAction.getFrontMostWindow() else {
+        guard let frontMostWindow = WindowCommand.getFrontMostWindow() else {
             debugPrint("get front most window failed"); return
         }
-        WindowAction.percent(frontMostWindow, widthPercent: width, heightPercent: height)
+        WindowCommand.percent(frontMostWindow, widthPercent: width, heightPercent: height)
     }
 }
