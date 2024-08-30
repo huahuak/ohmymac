@@ -206,12 +206,12 @@ class WindowSwitchShortcut {
                 return nil
             }
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-            if !wss.doing && keyCode == 48 && event.flags.contains(.maskCommand) { // cmd + tab
+            if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab
                 wss.doing = true
                 wss.start()
                 return nil
             }
-            if wss.doing && keyCode == 48 && event.flags.contains(.maskCommand) {
+            if wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) {
                 wss.cnt += 1
                 wss.next(wss.cnt)
                 return nil
