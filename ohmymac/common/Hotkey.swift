@@ -9,21 +9,33 @@ import Foundation
 import AppKit
 
 fileprivate let allFlags: NSEvent.ModifierFlags = [.shift, .option, .command, .function, .control]
+typealias KeyCode = UInt16
 
 class Hotkey {
     private var triggerTime: Double = 0
 
     init() {}
     
-    func flagsEq(eventFlags: NSEvent.ModifierFlags, flag : NSEvent.ModifierFlags) -> Bool {
+    private func flagsEq(eventFlags: NSEvent.ModifierFlags, flag : NSEvent.ModifierFlags) -> Bool {
         return eventFlags.contains(flag) && allFlags.subtracting(flag).intersection(eventFlags).isEmpty
+    }
+    // MARK: shortcut
+    func shortcut(keyCode: KeyCode, modifiers: NSEvent.ModifierFlags, handler: @escaping Fn) {
+        let fn: (NSEvent) -> Void = { [self] event in
+            if event.keyCode != keyCode { return }
+            if !flagsEq(eventFlags: event.modifierFlags, flag: modifiers) { return }
+            handler()
+        }
+        if let monitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown], handler: fn) {
+            deInitFunc.append {
+                NSEvent.removeMonitor(monitor)
+            }
+        }
     }
     
     // MARK: doubleTriggerFunc
     private let interval = 0.2 // sec
-    func doubleTrigger(keyCode: NSEvent.ModifierFlags,
-                       modifiers: NSEvent.ModifierFlags,
-                       handler: @escaping Fn) {
+    func doubleTrigger(keyCode: NSEvent.ModifierFlags, modifiers: NSEvent.ModifierFlags, handler: @escaping Fn) {
         let fn: (NSEvent) -> Void = { [self] event in
             if !event.modifierFlags.contains(modifiers) { triggerTime = 0; return }
             if event.type == .keyDown { triggerTime = 0; return }
@@ -78,7 +90,7 @@ class Hotkey {
 
 // MARK: Keycode enum
 
-struct Keycode {
+struct KeyCodeEnum {
     
     // Layout-independent Keys
     // eg.These key codes are always the same key on all layouts.

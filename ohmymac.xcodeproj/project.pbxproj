@@ -21,11 +21,8 @@
 		475247A52B96DDF70084460B /* QuickLook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479B2B96DDF70084460B /* QuickLook.swift */; };
 		475247A62B96DDF70084460B /* TmpFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479C2B96DDF70084460B /* TmpFile.swift */; };
 		475247A72B96DDF70084460B /* FocusManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479D2B96DDF70084460B /* FocusManager.swift */; };
-		475247A82B96DDF70084460B /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4752479E2B96DDF70084460B /* WebView.swift */; };
 		475247AA2B96DDF70084460B /* GoogleSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A12B96DDF70084460B /* GoogleSearch.swift */; };
 		475247AC2B96DDF70084460B /* Translate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 475247A32B96DDF70084460B /* Translate.swift */; };
-		47664E512BF39B2E00F2BD79 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 47664E502BF39B2E00F2BD79 /* HotKey */; };
-		47664E542BF39B3400F2BD79 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 47664E532BF39B3400F2BD79 /* Atomics */; };
 		4783D09E2C80A00600E4A694 /* ScreenTimeReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4783D09D2C80A00300E4A694 /* ScreenTimeReminder.swift */; };
 		4783D0A02C80B95800E4A694 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4783D09F2C80B95400E4A694 /* Notification.swift */; };
 		478C91692BBC3DA60031E95C /* Hotkey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C91682BBC3DA60031E95C /* Hotkey.swift */; };
@@ -54,7 +51,6 @@
 		4752479B2B96DDF70084460B /* QuickLook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuickLook.swift; sourceTree = "<group>"; };
 		4752479C2B96DDF70084460B /* TmpFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TmpFile.swift; sourceTree = "<group>"; };
 		4752479D2B96DDF70084460B /* FocusManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FocusManager.swift; sourceTree = "<group>"; };
-		4752479E2B96DDF70084460B /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		475247A12B96DDF70084460B /* GoogleSearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoogleSearch.swift; sourceTree = "<group>"; };
 		475247A32B96DDF70084460B /* Translate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translate.swift; sourceTree = "<group>"; };
 		4783D09D2C80A00300E4A694 /* ScreenTimeReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeReminder.swift; sourceTree = "<group>"; };
@@ -76,8 +72,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				471D00A62C7CD05E002639D1 /* SkyLight.framework in Frameworks */,
-				47664E542BF39B3400F2BD79 /* Atomics in Frameworks */,
-				47664E512BF39B2E00F2BD79 /* HotKey in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,7 +126,6 @@
 				475247872B96DC860084460B /* Menu.swift */,
 				4752479B2B96DDF70084460B /* QuickLook.swift */,
 				4752479C2B96DDF70084460B /* TmpFile.swift */,
-				4752479E2B96DDF70084460B /* WebView.swift */,
 			);
 			path = ui;
 			sourceTree = "<group>";
@@ -193,8 +186,6 @@
 			);
 			name = ohmymac;
 			packageProductDependencies = (
-				47664E502BF39B2E00F2BD79 /* HotKey */,
-				47664E532BF39B3400F2BD79 /* Atomics */,
 			);
 			productName = "awesome-mac";
 			productReference = 475247692B96DA030084460B /* ohmymac.app */;
@@ -226,8 +217,6 @@
 			);
 			mainGroup = 475247602B96DA030084460B;
 			packageReferences = (
-				47664E4F2BF39B2E00F2BD79 /* XCRemoteSwiftPackageReference "HotKey" */,
-				47664E522BF39B3400F2BD79 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 			);
 			productRefGroup = 4752476A2B96DA030084460B /* Products */;
 			projectDirPath = "";
@@ -258,7 +247,6 @@
 				47A2DF372BBD069200B7638F /* Observer.swift in Sources */,
 				475247922B96DC860084460B /* AppDelegate.swift in Sources */,
 				471F0C682BB9505500E00259 /* WindowManager.swift in Sources */,
-				475247A82B96DDF70084460B /* WebView.swift in Sources */,
 				47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */,
 				475247A62B96DDF70084460B /* TmpFile.swift in Sources */,
 				4752478E2B96DC860084460B /* Common.swift in Sources */,
@@ -510,38 +498,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		47664E4F2BF39B2E00F2BD79 /* XCRemoteSwiftPackageReference "HotKey" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/soffes/HotKey";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		47664E522BF39B3400F2BD79 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-atomics.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.2.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		47664E502BF39B2E00F2BD79 /* HotKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 47664E4F2BF39B2E00F2BD79 /* XCRemoteSwiftPackageReference "HotKey" */;
-			productName = HotKey;
-		};
-		47664E532BF39B3400F2BD79 /* Atomics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 47664E522BF39B3400F2BD79 /* XCRemoteSwiftPackageReference "swift-atomics" */;
-			productName = Atomics;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 475247612B96DA030084460B /* Project object */;
 }

@@ -32,8 +32,8 @@ let englishSourceID = "com.apple.keylayout.ABC"
 
 func executeChangeInputSource() {
     let source = CGEventSource(stateID: .hidSystemState)
-    let keyDownEvent = CGEvent(keyboardEventSource: source, virtualKey: Keycode.space, keyDown: true)
-    let keyUpEvent = CGEvent(keyboardEventSource: source, virtualKey: Keycode.space, keyDown: false)
+    let keyDownEvent = CGEvent(keyboardEventSource: source, virtualKey: KeyCodeEnum.space, keyDown: true)
+    let keyUpEvent = CGEvent(keyboardEventSource: source, virtualKey: KeyCodeEnum.space, keyDown: false)
     keyDownEvent?.flags = .maskControl
     keyUpEvent?.flags = .maskControl
     keyDownEvent?.post(tap: .cghidEventTap)
