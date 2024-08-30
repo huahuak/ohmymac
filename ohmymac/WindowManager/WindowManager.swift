@@ -197,6 +197,8 @@ class WindowSwitchShortcut {
     
     static func startCGEvent(wss: inout WindowSwitchShortcut) {
         func myCGEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
+            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+            if refcon == nil { return Unmanaged.passUnretained(event) }
             let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(refcon!).takeUnretainedValue()
             if type == .tapDisabledByTimeout {
                 notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
@@ -205,7 +207,6 @@ class WindowSwitchShortcut {
                 }
                 return nil
             }
-            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab
                 wss.doing = true
                 wss.start()
