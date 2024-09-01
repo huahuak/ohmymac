@@ -26,11 +26,9 @@ func startScreenTimeReminder(interval: TimeInterval) {
     startTimer()
     
     Observer.addGlobally(notice: NSWorkspace.screensDidWakeNotification) { _ in
-        debugPrint("wake")
         startTimer()
     }
     Observer.addGlobally(notice: NSWorkspace.screensDidSleepNotification) { _ in
-        debugPrint("sleep")
         count = 0;
         timer?.invalidate()
         timer = nil
