@@ -50,6 +50,7 @@ class Menu {
 //        }
 //    }
     
+    var shouldShow = false
     @objc(mouseEntered:) func mouseEntered(with event: NSEvent) {
         if !trackAreaLock.lock() { return }
         showAll()
@@ -57,7 +58,7 @@ class Menu {
     
     @objc(mouseExited:) func mouseExited(with event: NSEvent) {
         if !trackAreaLock.unlock() { return }
-        showOnlyLimit()
+        showLimited()
     }
     
     func show(_ v: NSView) {
@@ -107,7 +108,7 @@ class Menu {
         update()
     }
     
-    func showOnlyLimit() {
+    func showLimited() {
         while view.subviews.count > maxLimit {
             viewRecordsStack.append({
                 let first = view.arrangedSubviews.first!
