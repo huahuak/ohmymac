@@ -33,31 +33,40 @@ class Menu {
         trackArea = NSTrackingArea(
             rect: button.bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
         button.addTrackingArea(trackArea!)
-//        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-//        button.action = #selector(menuBtnClick(_:))
-//        button.target = self
+        //        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        //        button.action = #selector(menuBtnClick(_:))
+        //        button.target = self
     }
-
-//    @objc func menuBtnClick(_ sender: NSButton) {
-//        if let event = NSApp.currentEvent {
-//            let point = statusItem.button?.convert(event.locationInWindow, from: nil)
-//            view.arrangedSubviews.forEach({v in
-//                if let subButton = v as? NSButton,
-//                   subButton.frame.contains(point!) {
-//                    subButton.sendAction(subButton.action, to: subButton.target)
-//                }
-//            })
-//        }
-//    }
     
-    var shouldShow = false
+    //    @objc func menuBtnClick(_ sender: NSButton) {
+    //        if let event = NSApp.currentEvent {
+    //            let point = statusItem.button?.convert(event.locationInWindow, from: nil)
+    //            view.arrangedSubviews.forEach({v in
+    //                if let subButton = v as? NSButton,
+    //                   subButton.frame.contains(point!) {
+    //                    subButton.sendAction(subButton.action, to: subButton.target)
+    //                }
+    //            })
+    //        }
+    //    }
+    
+    var delayTimer: Timer? = nil
     @objc(mouseEntered:) func mouseEntered(with event: NSEvent) {
-        if !trackAreaLock.lock() { return }
-        showAll()
+        delayTimer?.invalidate()
+        delayTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [self] _ in
+            guard let button = statusItem.button else { return }
+            let buttonFrameInWindow = button.convert(button.bounds, to: nil)
+            guard let window = button.window else { return }
+            let windowFrame = window.frame
+            let buttonFrameInScreen = buttonFrameInWindow.offsetBy(dx: windowFrame.origin.x, dy: windowFrame.origin.y)
+            if NSMouseInRect(NSEvent.mouseLocation, buttonFrameInScreen, false) {
+                showAll()
+            }
+        }
     }
     
     @objc(mouseExited:) func mouseExited(with event: NSEvent) {
-        if !trackAreaLock.unlock() { return }
+        delayTimer?.invalidate()
         showLimited()
     }
     
