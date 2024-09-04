@@ -156,7 +156,6 @@ class WindowSwitchShortcut {
         return menu.view.arrangedSubviews[reverse] as? NSButton
     }
     let start:() -> Void =  {
-        menu.showAll()
         main.async {
             Thread.sleep(forTimeInterval: 0.1)
             if let btn = get(1) {
@@ -196,7 +195,8 @@ class WindowSwitchShortcut {
     }
     
     static func startCGEvent(wss: inout WindowSwitchShortcut) {
-        func cmdTabHandler(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
+        func cmdTabHandler(proxy: CGEventTapProxy, type: CGEventType,
+                           event: CGEvent, userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             if keyCode != KeyCodeEnum.tab && keyCode != KeyCodeEnum.command {
                 return Unmanaged.passUnretained(event)
@@ -208,6 +208,9 @@ class WindowSwitchShortcut {
                     CGEvent.tapEnable(tap: eventTap, enable: true)
                 }
                 return nil
+            }
+            if !wss.doing && !(event.flags.contains(.maskCommand) && keyCode == KeyCodeEnum.tab) {
+                return Unmanaged.passUnretained(event)
             }
             main.async {
                 if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab

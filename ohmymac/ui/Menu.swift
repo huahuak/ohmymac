@@ -51,9 +51,9 @@ class Menu {
     //    }
     
     var delayTimer: Timer? = nil
-    @objc(mouseEntered:) func mouseEntered(with event: NSEvent) {
+    func showAllWithDelay() {
         delayTimer?.invalidate()
-        delayTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [self] _ in
+        delayTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [self] _ in
             guard let button = statusItem.button else { return }
             let buttonFrameInWindow = button.convert(button.bounds, to: nil)
             guard let window = button.window else { return }
@@ -63,6 +63,10 @@ class Menu {
                 showAll()
             }
         }
+    }
+    
+    @objc(mouseEntered:) func mouseEntered(with event: NSEvent) {
+        showAllWithDelay()
     }
     
     @objc(mouseExited:) func mouseExited(with event: NSEvent) {
