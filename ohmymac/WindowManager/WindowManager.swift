@@ -196,10 +196,12 @@ class WindowSwitchShortcut {
     }
     
     static func startCGEvent(wss: inout WindowSwitchShortcut) {
-        func myCGEventCallback(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
+        func cmdTabHandler(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-            if refcon == nil { return Unmanaged.passUnretained(event) }
-            let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(refcon!).takeUnretainedValue()
+            if keyCode != KeyCodeEnum.tab && keyCode != KeyCodeEnum.command {
+                return Unmanaged.passUnretained(event)
+            }
+            let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(userInfo!).takeUnretainedValue()
             if type == .tapDisabledByTimeout {
                 notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
                 if let eventTap = wss.eventTap {
@@ -207,23 +209,25 @@ class WindowSwitchShortcut {
                 }
                 return nil
             }
-            if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab
-                wss.doing = true
-                wss.start()
-                return nil
+            main.async {
+                if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab
+                    wss.doing = true
+                    wss.start()
+                    return
+                }
+                if wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) {
+                    wss.cnt += 1
+                    wss.next(wss.cnt)
+                    return
+                }
+                if wss.doing && !event.flags.contains(.maskCommand) {
+                    wss.doing = false
+                    wss.end(wss.cnt)
+                    wss.cnt = 1
+                    return
+                }
             }
-            if wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) {
-                wss.cnt += 1
-                wss.next(wss.cnt)
-                return nil
-            }
-            if wss.doing && !event.flags.contains(.maskCommand) {
-                wss.doing = false
-                wss.end(wss.cnt)
-                wss.cnt = 1
-                return nil
-            }
-            return Unmanaged.passUnretained(event)
+            return nil
         }
         
         let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
@@ -232,7 +236,7 @@ class WindowSwitchShortcut {
                                                place: .headInsertEventTap,
                                                options: .defaultTap,
                                                eventsOfInterest: CGEventMask(eventMask),
-                                               callback: myCGEventCallback,
+                                               callback: cmdTabHandler,
                                                userInfo: userInfo) else {
             print("failed to create event tap")
             exit(ErrCode.Err)
