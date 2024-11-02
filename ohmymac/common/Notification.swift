@@ -27,6 +27,7 @@ func notify(msg: String, callback: Fn? = nil) {
         notificationCenter.id2callback[uuid] = fn
     }
     let request = UNNotificationRequest(identifier: uuid, content: content, trigger: trigger)
+    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     UNUserNotificationCenter.current().add(request) { error in
         if let error = error {
             print("Error adding notification request: \(error.localizedDescription)")
