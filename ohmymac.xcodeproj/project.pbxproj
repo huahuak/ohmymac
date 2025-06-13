@@ -145,7 +145,6 @@
 				475247A12B96DDF70084460B /* GoogleSearch.swift */,
 				473715312BA21245003275F2 /* SelectText.swift */,
 				475247A32B96DDF70084460B /* Translate.swift */,
-				477C3A732CF4CD7C00FB6F91 /* KeyPressEvent.swift */,
 			);
 			path = function;
 			sourceTree = "<group>";
@@ -173,6 +172,7 @@
 				4783D09F2C80B95400E4A694 /* Notification.swift */,
 				47A2DF362BBD069200B7638F /* Observer.swift */,
 				4752478B2B96DC860084460B /* WindowCommand.swift */,
+				477C3A732CF4CD7C00FB6F91 /* KeyPressEvent.swift */,
 			);
 			path = common;
 			sourceTree = "<group>";

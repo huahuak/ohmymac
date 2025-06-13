@@ -84,7 +84,7 @@ class Window: Equatable {
     }
     
     func focus() {
-        /// The following function was ported from 
+        /// The following function was ported from
         /// https://github.com/Hammerspoon/hammerspoon/issues/370#issuecomment-545545468
         func makeKeyWindow(_ psn: ProcessSerialNumber) -> Void {
             var psn_ = psn
@@ -152,16 +152,28 @@ class Window: Equatable {
         let btn = createMenuButton(self.baseIcon)
         btn.target = self
         btn.action = #selector(clickAction(_:))
-        btn.sendAction(on: [.leftMouseUp])
+        btn.sendAction(on: [.leftMouseUp, .leftMouseDown])
         deinitCallback.append {
             menu.clean(btn)
         }
         return btn
     }()
 
-    
     @objc func clickAction(_ sender: NSButton) {
-        if let event = NSApp.currentEvent {
+        let appExpose = {
+            do {
+                let appExpose =  Process()
+                appExpose.executableURL = URL(fileURLWithPath: "/bin/zsh")
+                let cmd = "shortcuts run AppExpose"
+                appExpose.arguments = ["-c", cmd]
+                try appExpose.run()
+            } catch let error {
+                debugPrint("run shortcut failed, \(error)")
+            }
+        }
+        guard let event = NSApp.currentEvent else { warn("get event failed"); return }
+        // single click
+        if event.type == .leftMouseUp {
             if event.modifierFlags.contains(.option) {
                 close()
                 return
@@ -171,6 +183,24 @@ class Window: Equatable {
                 return
             }
             focus()
+            return
+        }
+        // long press
+        if event.type == .leftMouseDown {
+            let delay = DispatchTime.now() + 0.5 // delay 0.5s
+            main.asyncAfter(deadline: delay) { [self] in
+                let leftMouseCheck = {
+                    // 1 << 0 is left mouse
+                    // 1 << 1 is right mouse
+                    return (NSEvent.pressedMouseButtons & (1 << 0)) != 0
+                }
+                if !leftMouseCheck() {
+                    return;
+                }
+                focus()
+                appExpose()
+            }
+            return
         }
     }
     
@@ -188,5 +218,21 @@ extension Window {
         if axWindow.isMinimized() ?? false { return WindowStatus.minimize }
         if axWindow.isFullScreent() ?? false { return WindowStatus.fullscreen }
         return WindowStatus.onSpace
+    }
+    
+    func updateWindowBadge() {
+        let icon = { [self] in
+            if let cnt = app?.windowCount(), cnt > 1,
+               #available(macOS 13.0, *),
+               let badge = NSImage(systemSymbolName: "\(cnt).circle.fill", accessibilityDescription: nil)?
+                .withSymbolConfiguration(
+                    NSImage.SymbolConfiguration.init(paletteColors: [.white, .black])
+                        .applying(NSImage.SymbolConfiguration(scale: .medium))
+                ) {
+                return iconAddSubscript(img: baseIcon, sub: badge)
+            }
+            return baseIcon
+        }
+        btn.image = icon()
     }
 }

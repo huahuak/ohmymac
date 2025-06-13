@@ -65,6 +65,7 @@ class Application {
             menu.clean(last.btn)
         }
         lastWindow = window
+        window.updateWindowBadge()
         menu.show(window.btn)
         // notify WindowManager
         WindowManager.notifyWindowActivated(window.cond)
@@ -78,6 +79,7 @@ class Application {
         }
         
         windows.removeAll(where: cond)
+        windows.forEach({win in win.updateWindowBadge()})
         if window == lastWindow {
             lastWindow = nil
         }
@@ -160,6 +162,10 @@ extension Application {
     
     func name() -> String {
         return nsApp.localizedName ?? "Unknown App"
+    }
+    
+    func windowCount() -> Int {
+        return windows.count
     }
     
     func findWindow(_ cond: WindowCond) -> Window? {

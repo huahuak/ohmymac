@@ -18,11 +18,11 @@ func audioDeviceChanged(
     addresses: UnsafePointer<AudioObjectPropertyAddress>
 ) {
     print("Audio device changed")
-    guard let deviceID = getAirPodsDeviceID() else { return }
+    guard let airpods = getAirPodsDeviceID() else { return }
     do {
         let volume: Float = 0.1875
-        if try readVolume(deviceID: deviceID) <= volume { return }
-        try setVolume(deviceID: deviceID, volume)
+        if try readVolume(deviceID: airpods) <= volume { return }
+        try setVolume(deviceID: airpods, volume)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             setVolume(to: volume)
         }
@@ -253,6 +253,16 @@ func getAirPodsDeviceID() -> AudioDeviceID? {
     return getAllOutputDeviceIDs().first(where: { id in
         if let name = getDeviceName(deviceID: id),
            name.contains("AirPods") {
+            return true
+        }
+        return false
+    })
+}
+
+func getMacbookDeviceID() -> AudioDeviceID? {
+    return getAllOutputDeviceIDs().first(where: { id in
+        if let name = getDeviceName(deviceID: id),
+           name.contains("Mac") {
             return true
         }
         return false

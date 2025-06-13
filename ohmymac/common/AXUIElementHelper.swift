@@ -59,6 +59,10 @@ extension AXUIElement {
         get(attr: .focused)
     }
     
+    func isFrontmostWindow() -> Bool? {
+        get(attr: .frontmost)
+    }
+
     @discardableResult
     func minimize() -> Bool {
         let result = AXUIElementSetAttributeValue(self, kAXMinimizedAttribute as CFString, kCFBooleanTrue)
