@@ -67,12 +67,14 @@ extension NSImage {
 
 
 func iconAddSubscript(img: NSImage, sub: NSImage) -> NSImage {
-    let image = NSImage(size: img.size)
+    let base = 4
+    let newsize = NSSize(width: img.size.width + CGFloat(base), height: img.size.height + CGFloat(base))
+    let image = NSImage(size: newsize)
     image.lockFocus()
-    img.draw(in: NSRect(x: 0, y: 0, width: Int(img.size.width), height: Int(img.size.height)),
+    img.draw(in: NSRect(x: (base / 2), y: (base / 2), width: Int(img.size.width), height: Int(img.size.height)),
              from: NSRect.zero, operation: .copy, fraction: 1.0)
-    let margin = -2
-    sub.draw(in: NSRect(x: Int(img.size.width - sub.size.width) - margin, y: margin,
+    let margin = 0
+    sub.draw(in: NSRect(x: Int(newsize.width - sub.size.width) - margin, y: margin,
                         width: Int(sub.size.width), height: Int(sub.size.height)),
              from: NSRect.zero, operation: .sourceOver, fraction: 1.0)
     image.unlockFocus()

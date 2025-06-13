@@ -226,7 +226,7 @@ extension Window {
                #available(macOS 13.0, *),
                let badge = NSImage(systemSymbolName: "\(cnt).circle.fill", accessibilityDescription: nil)?
                 .withSymbolConfiguration(
-                    NSImage.SymbolConfiguration.init(paletteColors: [.white, .black])
+                    NSImage.SymbolConfiguration.init(paletteColors: [.white, .black.withAlphaComponent(0.8)])
                         .applying(NSImage.SymbolConfiguration(scale: .medium))
                 ) {
                 return iconAddSubscript(img: baseIcon, sub: badge)
