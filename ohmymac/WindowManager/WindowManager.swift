@@ -10,20 +10,13 @@ import AppKit
 import Cocoa
 
 var windowManager: WindowManager? = nil
-private var backgroundThread: BackgroundThread?
 
 func startWindowMenuManager() {
-    backgroundThread = BackgroundThread() // must to init before windowManager.
     windowManager = WindowManager()
 }
 
-
 class WindowManager {
-    let wss: WindowSwitchShortcut = {
-        var wss = WindowSwitchShortcut()
-        WindowSwitchShortcut.startCGEvent(wss: &wss)
-        return wss
-    }()
+
     var applications: [Application] = []
     
     // status
@@ -33,6 +26,8 @@ class WindowManager {
     init() {
         let initApplicationFunc = { [self] (nsapp: NSRunningApplication) in
             if nsapp.localizedName == "ohmymac" { return }
+            if nsapp.localizedName == "CursorUIViewService" { return }
+            if nsapp.localizedName == "" { return }
             if applications.contains(where: { nsapp.processIdentifier == $0.nsApp.processIdentifier }) {
                 return
             }
@@ -146,125 +141,8 @@ extension WindowManager {
 }
 
 
-class WindowSwitchShortcut {
-    
-    var doing = false
-    var cnt = 1
-    var eventTap: CFMachPort?
-    
-    static func get (_ idx: Int) -> NSButton? {
-        if menu.view.subviews.isEmpty { return nil }
-        let reverse = menu.view.subviews.count - 1 - (idx % menu.view.subviews.count)
-        return menu.view.arrangedSubviews[reverse] as? NSButton
-    }
-    let start:() -> Void =  {
-        main.async {
-            Thread.sleep(forTimeInterval: 0.1)
-            if let btn = get(1) {
-                animate(shakeButton: btn)
-            }
-        }
-        get(1)?.highlight(true)
-    }
-    let next: (_ idx: Int)->Void =  {idx in
-        get(idx - 1)?.highlight(false)
-        if let selected = get(idx) {
-            selected.highlight(true)
-            animate(shakeButton: selected)
-        }
-    }
-    let end: (_ idx: Int) -> Void =  { idx in
-        get(idx - 1)?.highlight(false)
-        if let selected = get(idx) {
-            selected.highlight(false)
-            if let window = selected.target as? Window {
-                window.focus()
-            }
-        }
-    }
-    
-    private static func animate(shakeButton: NSButton) {
-        shakeButton.layer?.removeAllAnimations()
-        let shakeAnimation = CABasicAnimation(keyPath: "position")
-        shakeAnimation.duration = 0.05
-        shakeAnimation.repeatCount = 1
-        shakeAnimation.autoreverses = true
-        let fromPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y + 2)
-        let toPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y - 2)
-        shakeAnimation.fromValue = NSValue(point: fromPoint)
-        shakeAnimation.toValue = NSValue(point: toPoint)
-        shakeButton.layer?.add(shakeAnimation, forKey: "position")
-    }
-    
-    static func startCGEvent(wss: inout WindowSwitchShortcut) {
-        func cmdTabHandler(proxy: CGEventTapProxy, type: CGEventType,
-                           event: CGEvent, userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
-            let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(userInfo!).takeUnretainedValue()
-            if type == .tapDisabledByTimeout {
-                notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
-                if let eventTap = wss.eventTap {
-                    CGEvent.tapEnable(tap: eventTap, enable: true)
-                }
-                return nil
-            }
-            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
-            if keyCode != KeyCodeEnum.tab && keyCode != KeyCodeEnum.command {
-                return Unmanaged.passUnretained(event)
-            }
-            if !wss.doing && !(event.flags.contains(.maskCommand) && keyCode == KeyCodeEnum.tab) {
-                return Unmanaged.passUnretained(event)
-            }
-            main.async {
-                if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab
-                    wss.doing = true
-                    wss.start()
-                    return
-                }
-                if wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) {
-                    wss.cnt += 1
-                    wss.next(wss.cnt)
-                    return
-                }
-                if wss.doing && !event.flags.contains(.maskCommand) {
-                    wss.doing = false
-                    wss.end(wss.cnt)
-                    wss.cnt = 1
-                    return
-                }
-            }
-            return nil
-        }
-        
-        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
-        let userInfo = Unmanaged.passUnretained(wss).toOpaque()
-        guard let eventTap = CGEvent.tapCreate(tap: .cgSessionEventTap,
-                                               place: .headInsertEventTap,
-                                               options: .defaultTap,
-                                               eventsOfInterest: CGEventMask(eventMask),
-                                               callback: cmdTabHandler,
-                                               userInfo: userInfo) else {
-            print("failed to create event tap")
-            exit(ErrCode.Err)
-        }
-        wss.eventTap = eventTap
-        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-        CFRunLoopAddSource(backgroundThread!.backgroundRunLoop, runLoopSource, .defaultMode)
-        CGEvent.tapEnable(tap: eventTap, enable: true)
-    }
-}
 
-private class BackgroundThread {
-    var backgroundRunLoop : CFRunLoop?
-    var thread : Thread?
-    
-    init() {
-        thread = Thread {
-            while true {
-                self.backgroundRunLoop = CFRunLoopGetCurrent()
-                CFRunLoopRun()
-            }
-        }
-        thread?.start()
-    }
-}
+
+
+
 

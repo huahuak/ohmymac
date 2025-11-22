@@ -149,7 +149,7 @@ class Window: Equatable {
         return pin
     }()
     lazy var btn: NSButton = {
-        let btn = createMenuButton(self.baseIcon)
+        let btn = Menu.createBtn(self.baseIcon)
         btn.target = self
         btn.action = #selector(clickAction(_:))
         btn.sendAction(on: [.leftMouseUp, .leftMouseDown])

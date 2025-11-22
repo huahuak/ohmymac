@@ -13,10 +13,10 @@ import QuickLookUI
 // quicklook ui is used to show something in a quicklook pannel.
 
 fileprivate let ql = QuickLook()
-fileprivate let lock = Lock(before: menu.busy, after: menu.free)
+fileprivate let lock = NSLock()
 
 func openQuickLook(file: URL) {
-    if !lock.lock() { debugPrint("QuickLook is locked."); return }
+    lock.lock();
     ql.url = file
     
     if let panel = QLPreviewPanel.shared() {
@@ -72,7 +72,7 @@ fileprivate let fm = {
     }())
     
     fm.addCallback {
-        if !lock.unlock() { debugPrint("ql unlock failed!"); return }
+        lock.unlock();
         if let panel = QLPreviewPanel.shared() {
             panel.close()
         }

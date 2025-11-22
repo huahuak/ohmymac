@@ -9,148 +9,133 @@ import Cocoa
 
 // COMMENT:
 // menu is used to set menu icon.
+private let ICON_WIDTH = Int(NSStatusBar.system.thickness)
+private let MAX_COUNT = 3
 
-class Menu {
-    let statusItem: NSStatusItem
-    let view: NSStackView
-    var trackArea: NSTrackingArea?
-    let trackAreaLock = Lock()
-    let busyBtn = {
-        return createMenuButton(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
-    }()
-    let busyBtnLock = Lock()
-    var viewRecordsStack: [NSView] = []
-    let maxLimit = 5
+class MenuView: NSStackView {
+    private let trackingThread = DispatchQueue(label: "ohmymac.menuview.trackingthread")
+    private var trackingTimer = Timer()
     
-    
-    init() {
-        statusItem = NSStatusBar.system.statusItem(withLength: CGFloat(24))
-        view = NSStackView(frame: NSRect(x: 0, y: 0, width: 72, height: 22))
+    static func getMenuView() -> MenuView {
+        let view = MenuView()
         view.orientation = .horizontal
         view.distribution = .fillEqually
-        guard let button = statusItem.button else { return }
-        button.addSubview(view)
-        trackArea = NSTrackingArea(
-            rect: button.bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
-        button.addTrackingArea(trackArea!)
-        //        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        //        button.action = #selector(menuBtnClick(_:))
-        //        button.target = self
+        view.spacing = 0
+        
+        view.addTrackingArea(NSTrackingArea(
+            rect: .zero,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: view,
+            userInfo: ["status": "shortTracking"])
+        )
+        return view
     }
     
-    //    @objc func menuBtnClick(_ sender: NSButton) {
-    //        if let event = NSApp.currentEvent {
-    //            let point = statusItem.button?.convert(event.locationInWindow, from: nil)
-    //            view.arrangedSubviews.forEach({v in
-    //                if let subButton = v as? NSButton,
-    //                   subButton.frame.contains(point!) {
-    //                    subButton.sendAction(subButton.action, to: subButton.target)
-    //                }
-    //            })
-    //        }
-    //    }
+    func add(view: NSView) {
+        remove(view: view)
+        insertArrangedSubview(view, at: 0)
+        updateSubviewPriority()
+    }
     
-    var delayTimer: Timer? = nil
-    func showAllWithDelay() {
-        delayTimer?.invalidate()
-        delayTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [self] _ in
-            guard let button = statusItem.button else { return }
-            let buttonFrameInWindow = button.convert(button.bounds, to: nil)
-            guard let window = button.window else { return }
-            let windowFrame = window.frame
-            let buttonFrameInScreen = buttonFrameInWindow.offsetBy(dx: windowFrame.origin.x, dy: windowFrame.origin.y)
-            if NSMouseInRect(NSEvent.mouseLocation, buttonFrameInScreen, false) {
-                showAll()
+    func remove(view: NSView) {
+        if subviews.contains(where: { $0.isEqual(view) }) {
+            removeArrangedSubview(view)
+        }
+        view.removeFromSuperview()
+        updateSubviewPriority()
+    }
+    
+    private func updateSubviewPriority() {
+        for (idx, view) in arrangedSubviews.enumerated() {
+            if idx < MAX_COUNT {
+                view.isHidden = false
+            } else {
+                view.isHidden = true
+            }
+        }
+        ohmymac.menu.statusItem.length = CGFloat(min(MAX_COUNT, subviews.count) * ICON_WIDTH)
+    }
+    
+    // MOUSE TRACKING
+    func checkMouseInside() -> Bool {
+        guard let window = self.window else { return false }
+        var mouseLocation = NSEvent.mouseLocation
+        mouseLocation = window.convertPoint(fromScreen: mouseLocation)
+        let localPoint = self.convert(mouseLocation, from: nil)
+        return self.frame.contains(localPoint)
+    }
+    
+    @objc(mouseEntered:) override func mouseEntered(with event: NSEvent) {
+        if event.trackingArea?.userInfo?["status"] as? String == "shortTracking" {
+            trackingTimer.invalidate()
+            trackingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self] _ in
+                if !checkMouseInside() { return }
+                ohmymac.menu.statusItem.length = CGFloat(subviews.count * ICON_WIDTH)
+                for view in arrangedSubviews {
+                    view.isHidden = false
+                }
+                main.asyncAfter(deadline: .now() + 0.15) { [self] in
+                    addTrackingArea(NSTrackingArea(
+                        rect: .zero,
+                        options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+                        owner: self,
+                        userInfo: ["status": "longTracking"])
+                    )
+                }
             }
         }
     }
     
-    @objc(mouseEntered:) func mouseEntered(with event: NSEvent) {
-        showAllWithDelay()
-    }
-    
-    @objc(mouseExited:) func mouseExited(with event: NSEvent) {
-        delayTimer?.invalidate()
-        showLimited()
-    }
-    
-    func show(_ v: NSView) {
-        view.subviews.removeAll(where: { target in target == v })
-        viewRecordsStack.removeAll(where: { target in target == v })
-        while view.subviews.count > maxLimit - 1 {
-            viewRecordsStack.append({
-                let first = view.arrangedSubviews.first!
-                view.removeArrangedSubview(first)
-                first.removeFromSuperview()
-                return first
-            }())
-        }
-        view.addArrangedSubview(v)
-        update()
-    }
-    
-    func clean(_ v: NSView) {
-        view.subviews.removeAll(where: { target in target == v})
-        viewRecordsStack.removeAll(where: { target in target == v})
-        while view.subviews.count < maxLimit && viewRecordsStack.count > 0 {
-            view.insertArrangedSubview(viewRecordsStack.removeLast(), at: 0)
-        }
-        update()
-    }
-    
-    func busy() {
-        if busyBtnLock.lock() {
-            show(busyBtn)
-        } else {
-            busyBtnLock.p()
-        }
-    }
-    
-    func free() {
-        if busyBtnLock.unlock() {
-            clean(busyBtn)
-        } else {
-            busyBtnLock.v()
-        }
-        
-    }
-    
-    func showAll() {
-        viewRecordsStack.reversed().forEach({ item in view.insertArrangedSubview(item, at: 0)})
-        viewRecordsStack.removeAll()
-        update()
-    }
-    
-    func showLimited() {
-        while view.subviews.count > maxLimit {
-            viewRecordsStack.append({
-                let first = view.arrangedSubviews.first!
-                view.removeArrangedSubview(first)
-                first.removeFromSuperview()
-                return first
-            }())
-        }
-        update()
-    }
-    
-    private func update() {
-        statusItem.length = CGFloat(view.subviews.count * 24)
-        view.frame.size.width = CGFloat(view.subviews.count * 24)
-        if let trackArea = trackArea,
-           let button = statusItem.button {
-            button.removeTrackingArea(trackArea)
-            self.trackArea = NSTrackingArea(
-                rect: button.bounds, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
-            button.addTrackingArea(self.trackArea!)
+    @objc(mouseExited:) override func mouseExited(with event: NSEvent) {
+        if event.trackingArea?.userInfo?["status"] as? String == "longTracking" {
+            updateSubviewPriority()
+            removeTrackingArea(event.trackingArea!)
         }
     }
 }
 
-func createMenuButton(_ img: NSImage) -> NSButton {
-    let button = NSButton(frame: NSRect(x: 0, y: 0, width: 26, height: 26))
-    button.image = img
-    button.isBordered = false
-    return button
+
+class Menu {
+    let view = MenuView.getMenuView()
+    var wss =  {
+        var wss = WindowSwitchShortcut()
+        WindowSwitchShortcut.startCGEvent(wss: &wss)
+        return wss
+    }()
+    let statusItem: NSStatusItem
+    let busyBtn = {
+        return Menu.createBtn(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
+    }()
+    
+    init() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem.button {
+            button.addSubview(view)
+            view.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                view.leadingAnchor.constraint(equalTo: button.leadingAnchor),
+                view.trailingAnchor.constraint(equalTo: button.trailingAnchor),
+                view.topAnchor.constraint(equalTo: button.topAnchor),
+                view.bottomAnchor.constraint(equalTo: button.bottomAnchor)
+            ])
+        }
+    }
+    
+    func show(_ v: NSView) {
+        view.add(view: v)
+    }
+    
+    func clean(_ v: NSView) {
+        view.remove(view: v)
+    }
+    
+    static func createBtn(_ img: NSImage) -> NSButton {
+        let button = NSButton(frame: NSRect(x: 0, y: 0, width: ICON_WIDTH, height: ICON_WIDTH))
+        button.image = img
+        button.isBordered = false
+        return button
+    }
+    
 }
 
 func randomIcon() -> NSImage {
@@ -173,4 +158,116 @@ func randomIcon() -> NSImage {
 }
 
 
+// SHORTCUT FOR CMD+TAB
+class WindowSwitchShortcut {
+    let backgroundThread = BackgroundThread()
+    
+    var doing = false
+    var cnt = 1
+    var eventTap: CFMachPort?
+    
+    static func get (_ idx: Int) -> NSButton? {
+        if menu.view.subviews.isEmpty { return nil }
+        let reverse = /*menu.view.arrangedSubviews.count - 1 -*/ (idx % min(MAX_COUNT, menu.view.arrangedSubviews.count))
+        return menu.view.arrangedSubviews[reverse] as? NSButton
+    }
+    
+    let start:() -> Void =  {
+        main.async {
+            Thread.sleep(forTimeInterval: 0.1)
+            if let btn = get(1) {
+                animate(shakeButton: btn)
+            }
+        }
+        get(1)?.highlight(true)
+    }
+    
+    let next: (_ idx: Int)->Void =  {idx in
+        get(idx - 1)?.highlight(false)
+        if let selected = get(idx) {
+            selected.highlight(true)
+            animate(shakeButton: selected)
+        }
+    }
+    
+    let end: (_ idx: Int) -> Void =  { idx in
+        get(idx - 1)?.highlight(false)
+        if let selected = get(idx) {
+            selected.highlight(false)
+            if let window = selected.target as? Window {
+                window.focus()
+            }
+        }
+    }
+    
+    private static func animate(shakeButton: NSButton) {
+        shakeButton.layer?.removeAllAnimations()
+        let shakeAnimation = CABasicAnimation(keyPath: "position")
+        shakeAnimation.duration = 0.05
+        shakeAnimation.repeatCount = 1
+        shakeAnimation.autoreverses = true
+        let fromPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y + 2)
+        let toPoint = CGPoint(x: shakeButton.frame.origin.x, y: shakeButton.frame.origin.y - 2)
+        shakeAnimation.fromValue = NSValue(point: fromPoint)
+        shakeAnimation.toValue = NSValue(point: toPoint)
+        shakeButton.layer?.add(shakeAnimation, forKey: "position")
+    }
+    
+    // SHORTCUT FOR CMD+TAB
+    static func startCGEvent(wss: inout WindowSwitchShortcut) {
+        func cmdTabHandler(proxy: CGEventTapProxy, type: CGEventType,
+                           event: CGEvent, userInfo: UnsafeMutableRawPointer?) -> Unmanaged<CGEvent>? {
+            let wss = Unmanaged<WindowSwitchShortcut>.fromOpaque(userInfo!).takeUnretainedValue()
+            if type == .tapDisabledByTimeout {
+                notify(msg: "cmd+tab shortcut was disabled by timeout!\nnow restart...")
+                if let eventTap = wss.eventTap {
+                    CGEvent.tapEnable(tap: eventTap, enable: true)
+                }
+                return nil
+            }
+            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+            if keyCode != KeyCodeEnum.tab && keyCode != KeyCodeEnum.command {
+                return Unmanaged.passUnretained(event)
+            }
+            if !wss.doing && !(event.flags.contains(.maskCommand) && keyCode == KeyCodeEnum.tab) {
+                return Unmanaged.passUnretained(event)
+            }
+            main.async {
+                if !wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) { // cmd + tab
+                    wss.doing = true
+                    wss.start()
+                    return
+                }
+                if wss.doing && keyCode == KeyCodeEnum.tab && event.flags.contains(.maskCommand) {
+                    wss.cnt += 1
+                    wss.next(wss.cnt)
+                    return
+                }
+                if wss.doing && !event.flags.contains(.maskCommand) {
+                    wss.doing = false
+                    wss.end(wss.cnt)
+                    wss.cnt = 1
+                    return
+                }
+            }
+            return nil
+        }
+        
+        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
+        let userInfo = Unmanaged.passUnretained(wss).toOpaque()
+        guard let eventTap = CGEvent.tapCreate(tap: .cgSessionEventTap,
+                                               place: .headInsertEventTap,
+                                               options: .defaultTap,
+                                               eventsOfInterest: CGEventMask(eventMask),
+                                               callback: cmdTabHandler,
+                                               userInfo: userInfo) else {
+            print("failed to create event tap")
+            exit(ErrCode.Err)
+        }
+        wss.eventTap = eventTap
+        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+        CFRunLoopAddSource(wss.backgroundThread.backgroundRunLoop, runLoopSource, .defaultMode)
+        CGEvent.tapEnable(tap: eventTap, enable: true)
+    }
+}
 

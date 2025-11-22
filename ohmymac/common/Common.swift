@@ -45,3 +45,18 @@ func retry(f: () throws -> Void, times: UInt8 = 3) {
         retry(f: f, times: times - 1)
     }
 }
+
+class BackgroundThread {
+    var backgroundRunLoop : CFRunLoop?
+    var thread : Thread?
+    
+    init() {
+        thread = Thread {
+            while true {
+                self.backgroundRunLoop = CFRunLoopGetCurrent()
+                CFRunLoopRun()
+            }
+        }
+        thread?.start()
+    }
+}

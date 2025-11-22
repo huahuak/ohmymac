@@ -32,7 +32,6 @@
 		47A2C4352BBF478300F972F8 /* Application.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2C4342BBF478300F972F8 /* Application.swift */; };
 		47A2DF372BBD069200B7638F /* Observer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A2DF362BBD069200B7638F /* Observer.swift */; };
 		47A8BCD62BBB23BE00DCDA3C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47A8BCD52BBB23BE00DCDA3C /* Image.swift */; };
-		47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D14D5E2BBDBFF200198C1C /* Concurrent.swift */; };
 		47E3970B2BBC816800E22718 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E3970A2BBC816800E22718 /* Logger.swift */; };
 /* End PBXBuildFile section */
 
@@ -66,7 +65,6 @@
 		47A2DF362BBD069200B7638F /* Observer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observer.swift; sourceTree = "<group>"; };
 		47A8BCD52BBB23BE00DCDA3C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		47C9DEB12BBAB266002189C6 /* ohmymac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ohmymac.entitlements; sourceTree = "<group>"; };
-		47D14D5E2BBDBFF200198C1C /* Concurrent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Concurrent.swift; sourceTree = "<group>"; };
 		47E3970A2BBC816800E22718 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		47EF14902C5070BF00E83209 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -164,7 +162,6 @@
 			children = (
 				471F0C692BB976AC00E00259 /* AXUIElementHelper.swift */,
 				475247882B96DC860084460B /* Common.swift */,
-				47D14D5E2BBDBFF200198C1C /* Concurrent.swift */,
 				4752479D2B96DDF70084460B /* FocusManager.swift */,
 				478C91682BBC3DA60031E95C /* Hotkey.swift */,
 				47A8BCD52BBB23BE00DCDA3C /* Image.swift */,
@@ -207,7 +204,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					475247682B96DA030084460B = {
 						CreatedOnToolsVersion = 15.0;
@@ -256,7 +253,6 @@
 				47A2DF372BBD069200B7638F /* Observer.swift in Sources */,
 				475247922B96DC860084460B /* AppDelegate.swift in Sources */,
 				471F0C682BB9505500E00259 /* WindowManager.swift in Sources */,
-				47D14D5F2BBDBFF200198C1C /* Concurrent.swift in Sources */,
 				475247A62B96DDF70084460B /* TmpFile.swift in Sources */,
 				4752478E2B96DC860084460B /* Common.swift in Sources */,
 				473715322BA21245003275F2 /* SelectText.swift in Sources */,
@@ -318,6 +314,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -382,6 +379,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 5UK2N84UR3;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -416,8 +414,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 31;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5UK2N84UR3;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = ohmymac/Info.plist;
@@ -458,8 +455,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 31;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5UK2N84UR3;
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = ohmymac/Info.plist;
