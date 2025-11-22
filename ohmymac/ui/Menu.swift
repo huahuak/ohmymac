@@ -14,6 +14,7 @@ private let MAX_COUNT = 3
 
 class MenuView: NSStackView {
     private var trackingTimer = Timer()
+    private var longTracking: NSTrackingArea?
     
     static func getMenuView() -> MenuView {
         let view = MenuView()
@@ -66,6 +67,7 @@ class MenuView: NSStackView {
     
     @objc(mouseEntered:) override func mouseEntered(with event: NSEvent) {
         if event.trackingArea?.userInfo?["status"] as? String == "shortTracking" {
+            print("short")
             trackingTimer.invalidate()
             trackingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self] _ in
                 if !checkMouseInside() { return }
@@ -74,12 +76,14 @@ class MenuView: NSStackView {
                     view.isHidden = false
                 }
                 main.asyncAfter(deadline: .now() + 0.15) { [self] in
-                    addTrackingArea(NSTrackingArea(
+                    if longTracking != nil { return }
+                    longTracking = NSTrackingArea(
                         rect: .zero,
                         options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
                         owner: self,
-                        userInfo: ["status": "longTracking"])
+                        userInfo: ["status": "longTracking"]
                     )
+                    addTrackingArea(longTracking!)
                 }
             }
         }
@@ -87,8 +91,12 @@ class MenuView: NSStackView {
     
     @objc(mouseExited:) override func mouseExited(with event: NSEvent) {
         if event.trackingArea?.userInfo?["status"] as? String == "longTracking" {
+            print("long")
             updateSubviewPriority()
-            removeTrackingArea(event.trackingArea!)
+            if let area = longTracking {
+                removeTrackingArea(area)
+                longTracking = nil
+            }
         }
     }
 }
