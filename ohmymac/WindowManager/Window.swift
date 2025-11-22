@@ -34,6 +34,7 @@ class Window: Equatable {
               level == CGWindowLevelForKey(.normalWindow),
               axWindow.windowSize() != nil,
               axWindow.windowTitle() != nil,
+              axWindow.windowTitle() != "",
               [kAXStandardWindowSubrole, kAXDialogSubrole].contains(axWindow.subrole())
         else {
             info("\(nsApp.localizedName ?? "unkown app") want to create no allowed window!")
@@ -158,19 +159,8 @@ class Window: Equatable {
         }
         return btn
     }()
-
+    
     @objc func clickAction(_ sender: NSButton) {
-        let appExpose = {
-            do {
-                let appExpose =  Process()
-                appExpose.executableURL = URL(fileURLWithPath: "/bin/zsh")
-                let cmd = "shortcuts run AppExpose"
-                appExpose.arguments = ["-c", cmd]
-                try appExpose.run()
-            } catch let error {
-                debugPrint("run shortcut failed, \(error)")
-            }
-        }
         guard let event = NSApp.currentEvent else { warn("get event failed"); return }
         // single click
         if event.type == .leftMouseUp {
@@ -182,24 +172,11 @@ class Window: Equatable {
                 minimize()
                 return
             }
-            focus()
-            return
-        }
-        // long press
-        if event.type == .leftMouseDown {
-            let delay = DispatchTime.now() + 0.5 // delay 0.5s
-            main.asyncAfter(deadline: delay) { [self] in
-                let leftMouseCheck = {
-                    // 1 << 0 is left mouse
-                    // 1 << 1 is right mouse
-                    return (NSEvent.pressedMouseButtons & (1 << 0)) != 0
-                }
-                if !leftMouseCheck() {
-                    return;
-                }
-                focus()
-                appExpose()
+            if nsApp.isActive {
+                app?.switchBrotherWindow({ return $0 == self })
+                return
             }
+            focus()
             return
         }
     }

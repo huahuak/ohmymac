@@ -13,7 +13,6 @@ private let ICON_WIDTH = Int(NSStatusBar.system.thickness)
 private let MAX_COUNT = 3
 
 class MenuView: NSStackView {
-    private let trackingThread = DispatchQueue(label: "ohmymac.menuview.trackingthread")
     private var trackingTimer = Timer()
     
     static func getMenuView() -> MenuView {
@@ -33,7 +32,7 @@ class MenuView: NSStackView {
     
     func add(view: NSView) {
         remove(view: view)
-        insertArrangedSubview(view, at: 0)
+        addArrangedSubview(view)
         updateSubviewPriority()
     }
     
@@ -47,10 +46,10 @@ class MenuView: NSStackView {
     
     private func updateSubviewPriority() {
         for (idx, view) in arrangedSubviews.enumerated() {
-            if idx < MAX_COUNT {
-                view.isHidden = false
-            } else {
+            if idx < subviews.count - MAX_COUNT {
                 view.isHidden = true
+            } else {
+                view.isHidden = false
             }
         }
         ohmymac.menu.statusItem.length = CGFloat(min(MAX_COUNT, subviews.count) * ICON_WIDTH)
@@ -168,7 +167,7 @@ class WindowSwitchShortcut {
     
     static func get (_ idx: Int) -> NSButton? {
         if menu.view.subviews.isEmpty { return nil }
-        let reverse = /*menu.view.arrangedSubviews.count - 1 -*/ (idx % min(MAX_COUNT, menu.view.arrangedSubviews.count))
+        let reverse = menu.view.arrangedSubviews.count - 1 - (idx % min(MAX_COUNT, menu.view.arrangedSubviews.count))
         return menu.view.arrangedSubviews[reverse] as? NSButton
     }
     

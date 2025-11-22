@@ -71,6 +71,19 @@ class Application {
         WindowManager.notifyWindowActivated(window.cond)
     }
     
+    func switchBrotherWindow(_ cond: WindowCond) {
+        guard let idx = windows.firstIndex(where: cond) else {
+            warn("Application.switchBrotherWindow(): window not found!")
+            return
+        }
+        
+        let next = windows[(idx + 1) % windowCount()]
+        removeWindow({ return $0 == next })
+        appendWindow(next)
+        // TODO: review code
+        next.focus()
+    }
+
     /// remove all window ref in the application, then remove from menubar automatically.
     private func removeWindow(_ cond: WindowCond) {
         guard let window = windows.first(where: cond) else {
