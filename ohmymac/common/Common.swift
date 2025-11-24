@@ -12,7 +12,6 @@ typealias Fn = () -> Void
 
 let main = DispatchQueue.main
 let global = DispatchQueue.global()
-let event = DispatchQueue(label: "background", qos: .userInteractive)
 
 var deInitFunc: [Fn] = [{
     notify(msg: "Bye~")

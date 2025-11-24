@@ -10,7 +10,7 @@ import Cocoa
 // COMMENT:
 // menu is used to set menu icon.
 private let ICON_WIDTH = Int(NSStatusBar.system.thickness)
-private let MAX_COUNT = 3
+private let MAX_COUNT = 6
 
 class MenuView: NSStackView {
     private var trackingTimer = Timer()
@@ -29,6 +29,15 @@ class MenuView: NSStackView {
             userInfo: ["status": "shortTracking"])
         )
         return view
+    }
+    
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        for view in subviews {
+            if view.frame.contains(point) {
+                return view
+            }
+        }
+        return nil
     }
     
     func add(view: NSView) {
@@ -67,7 +76,6 @@ class MenuView: NSStackView {
     
     @objc(mouseEntered:) override func mouseEntered(with event: NSEvent) {
         if event.trackingArea?.userInfo?["status"] as? String == "shortTracking" {
-            print("short")
             trackingTimer.invalidate()
             trackingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [self] _ in
                 if !checkMouseInside() { return }
@@ -91,7 +99,6 @@ class MenuView: NSStackView {
     
     @objc(mouseExited:) override func mouseExited(with event: NSEvent) {
         if event.trackingArea?.userInfo?["status"] as? String == "longTracking" {
-            print("long")
             updateSubviewPriority()
             if let area = longTracking {
                 removeTrackingArea(area)
@@ -111,7 +118,7 @@ class Menu {
     }()
     let statusItem: NSStatusItem
     let busyBtn = {
-        return Menu.createBtn(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
+        return MenuButton.createBtn(NSImage(systemSymbolName: "rays", accessibilityDescription: nil)!)
     }()
     
     init() {
@@ -136,13 +143,34 @@ class Menu {
         view.remove(view: v)
     }
     
-    static func createBtn(_ img: NSImage) -> NSButton {
-        let button = NSButton(frame: NSRect(x: 0, y: 0, width: ICON_WIDTH, height: ICON_WIDTH))
-        button.image = img
-        button.isBordered = false
-        return button
+}
+
+class MenuButton: NSButton {
+    fileprivate var rightAction: ((NSEvent) -> ())?
+    fileprivate var leftAction: ((NSEvent) -> ())?
+
+    override func rightMouseUp(with event: NSEvent) {
+        rightAction?(event)
     }
     
+    @objc func clickAction(_ sender: NSButton) {
+        leftAction?(NSEvent())
+    }
+    
+    static func createBtn(_ img: NSImage,
+                          leftAction: ((NSEvent) -> Void)? = nil,
+                          rightAction: ((NSEvent) -> Void)? = nil) -> NSButton {
+        let button = MenuButton(frame: NSRect(x: 0, y: 0, width: ICON_WIDTH, height: ICON_WIDTH))
+        button.image = img
+        button.isBordered = false
+        // click action
+        button.action = #selector(clickAction(_:))
+        button.target = button
+        button.sendAction(on: [.leftMouseUp])
+        button.leftAction = leftAction
+        button.rightAction = rightAction
+        return button
+    }
 }
 
 func randomIcon() -> NSImage {

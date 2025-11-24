@@ -150,35 +150,27 @@ class Window: Equatable {
         return pin
     }()
     lazy var btn: NSButton = {
-        let btn = Menu.createBtn(self.baseIcon)
-        btn.target = self
-        btn.action = #selector(clickAction(_:))
-        btn.sendAction(on: [.leftMouseUp, .leftMouseDown])
+        let btn = MenuButton.createBtn(self.baseIcon, leftAction: clickAction, rightAction: rightClickAction)
         deinitCallback.append {
             menu.clean(btn)
         }
         return btn
     }()
     
-    @objc func clickAction(_ sender: NSButton) {
-        guard let event = NSApp.currentEvent else { warn("get event failed"); return }
-        // single click
-        if event.type == .leftMouseUp {
-            if event.modifierFlags.contains(.option) {
-                close()
-                return
-            }
-            if event.modifierFlags.contains(.control) {
-                minimize()
-                return
-            }
-            if nsApp.isActive {
-                app?.switchBrotherWindow({ return $0 == self })
-                return
-            }
-            focus()
-            return
-        }
+     func clickAction(_ event: NSEvent) {
+         print("here")
+         switch NSEvent.modifierFlags {
+         case let flags where flags.contains(.control):
+             minimize()
+         case _ where nsApp.isActive:
+             app?.switchBrotherWindow({ $0 == self })
+         default:
+             focus()
+         }
+     }
+    
+    func rightClickAction(_ event: NSEvent) {
+        close()
     }
     
     static func == (lhs: Window, rhs: Window) -> Bool {
