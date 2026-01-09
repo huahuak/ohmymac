@@ -148,9 +148,14 @@ class Menu {
 class MenuButton: NSButton {
     fileprivate var rightAction: ((NSEvent) -> ())?
     fileprivate var leftAction: ((NSEvent) -> ())?
+    fileprivate var midAction: ((NSEvent) -> ())?
 
     override func rightMouseUp(with event: NSEvent) {
         rightAction?(event)
+    }
+    
+    override func otherMouseUp(with event: NSEvent) {
+        midAction?(event)
     }
     
     @objc func clickAction(_ sender: NSButton) {
@@ -159,7 +164,8 @@ class MenuButton: NSButton {
     
     static func createBtn(_ img: NSImage,
                           leftAction: ((NSEvent) -> Void)? = nil,
-                          rightAction: ((NSEvent) -> Void)? = nil) -> NSButton {
+                          rightAction: ((NSEvent) -> Void)? = nil,
+                          midAction: ((NSEvent) -> Void)? = nil) -> NSButton {
         let button = MenuButton(frame: NSRect(x: 0, y: 0, width: ICON_WIDTH, height: ICON_WIDTH))
         button.image = img
         button.isBordered = false
@@ -169,6 +175,7 @@ class MenuButton: NSButton {
         button.sendAction(on: [.leftMouseUp])
         button.leftAction = leftAction
         button.rightAction = rightAction
+        button.midAction = midAction
         return button
     }
 }
@@ -229,8 +236,8 @@ class WindowSwitchShortcut {
         get(idx - 1)?.highlight(false)
         if let selected = get(idx) {
             selected.highlight(false)
-            if let window = selected.target as? Window {
-                window.focus()
+            if let btn = selected.target as? MenuButton {
+                btn.leftAction?(NSEvent())
             }
         }
     }

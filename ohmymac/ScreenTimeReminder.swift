@@ -6,9 +6,18 @@
 //
 import Foundation
 import AppKit
+import CoreGraphics
 
 private var timer: Timer? = nil
 private var count = 0;
+
+func isScreenLocked() -> Bool {
+    if let sessionInfo = CGSessionCopyCurrentDictionary() as? [String: Any],
+       let locked = sessionInfo["CGSSessionScreenIsLocked"] as? Bool {
+        return locked
+    }
+    return false
+}
 
 func startScreenTimeReminder(interval: TimeInterval) {
     

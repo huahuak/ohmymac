@@ -34,7 +34,8 @@ class Window: Equatable {
               level == CGWindowLevelForKey(.normalWindow),
               axWindow.windowSize() != nil,
               axWindow.windowTitle() != nil,
-              axWindow.windowTitle() != "",
+              axWindow.subrole() != "AXDialog", // which is system window
+              axWindow.windowTitle() != "Untitled",
               [kAXStandardWindowSubrole, kAXDialogSubrole].contains(axWindow.subrole())
         else {
             info("\(nsApp.localizedName ?? "unkown app") want to create no allowed window!")
@@ -149,29 +150,33 @@ class Window: Equatable {
         pin.size = NSSize(width: 9, height: 9)
         return pin
     }()
+    // dont capture self in strong ref !!!
+    lazy var clickAction:  (_ event: NSEvent) -> Void = { [weak self] _ in
+        guard let ref = self else { return }
+        switch NSEvent.modifierFlags {
+        case let flags where flags.contains(.control):
+            ref.minimize()
+        case _ where ref.nsApp.isActive:
+            ref.app?.switchBrotherWindow({ $0 == self })
+        default:
+            ref.focus()
+        }
+    }
+    lazy var rightClickAction: (_ event: NSEvent) -> Void = { [weak self] _ in
+        self?.close()
+    }
+    lazy var midClickAction: (_ event: NSEvent) -> Void = { [weak self] _ in
+        self?.minimize()
+    }
     lazy var btn: NSButton = {
-        let btn = MenuButton.createBtn(self.baseIcon, leftAction: clickAction, rightAction: rightClickAction)
+        let btn = MenuButton.createBtn(self.baseIcon, leftAction: clickAction, rightAction: rightClickAction, midAction: midClickAction)
         deinitCallback.append {
             menu.clean(btn)
         }
         return btn
     }()
     
-     func clickAction(_ event: NSEvent) {
-         print("here")
-         switch NSEvent.modifierFlags {
-         case let flags where flags.contains(.control):
-             minimize()
-         case _ where nsApp.isActive:
-             app?.switchBrotherWindow({ $0 == self })
-         default:
-             focus()
-         }
-     }
     
-    func rightClickAction(_ event: NSEvent) {
-        close()
-    }
     
     static func == (lhs: Window, rhs: Window) -> Bool {
         return lhs.windowID == rhs.windowID
